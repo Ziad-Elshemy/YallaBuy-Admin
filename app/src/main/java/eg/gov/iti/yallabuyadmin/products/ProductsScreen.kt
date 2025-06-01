@@ -1,19 +1,39 @@
 package eg.gov.iti.yallabuyadmin.products
 
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,9 +43,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import eg.gov.iti.yallabuyadmin.model.Product
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import com.skydoves.landscapist.glide.GlideImage
+import eg.gov.iti.yallabuyadmin.model.ProductsItem
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductsScreen(navController: NavController, viewModel: ProductsViewModel) {
 
@@ -40,13 +73,36 @@ fun ProductsScreen(navController: NavController, viewModel: ProductsViewModel) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(remember { SnackbarHostState() }) }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(remember { SnackbarHostState() }) },
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .statusBarsPadding(),
+                title = { Text("Products", fontSize = 20.sp) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    actionIconContentColor = Color.Black
+                ),
+                actions = {
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    }
+
+                    IconButton(onClick = { navController.navigate("addProduct") }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Product")
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = backgroundBrush)
+//                .background(brush = backgroundBrush)
+                .background(Color.White)
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top,
@@ -65,22 +121,127 @@ fun ProductsScreen(navController: NavController, viewModel: ProductsViewModel) {
 
 
 @Composable
-fun ProductsScreenUI(modifier: Modifier = Modifier, products: List<Product>) {
+fun ProductsScreenUI(modifier: Modifier = Modifier, products: List<ProductsItem?>?) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        LazyColumn {
-            items(products) { product ->
-                Text(text = product.title)
+        ProductsList(
+            products = products,
+            onDeleteProduct = { product ->
+                // viewModel.deleteProduct(product)
+                // add snack bar
             }
-        }
-
+        )
     }
 }
 
+@Composable
+fun ProductsList(
+    products: List<ProductsItem?>?,
+    onDeleteProduct: (ProductsItem?) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(products ?: emptyList()) { product ->
+            ProductItem(
+                product = product,
+                onDeleteClick = { onDeleteProduct(product) }
+            )
+        }
+    }
+}
+
+@Composable
+fun ProductItem(
+    product: ProductsItem?,
+    onDeleteClick: () -> Unit
+) {
+    val imageUrl = product?.images?.firstOrNull()?.src
+    val price = product?.variants?.firstOrNull()?.price ?: "0.00"
+
+    Card(
+        modifier = Modifier
+            .clickable { }
+            .width(160.dp)
+            .height(220.dp)
+            .padding(4.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!imageUrl.isNullOrEmpty()) {
+                    GlideImage(
+                        imageModel = { imageUrl },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(10.dp)),
+                        loading = {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        },
+                        failure = {
+                            Icon(Icons.Default.Build, contentDescription = "Failed to load")
+                        }
+                    )
+                } else {
+                    Icon(Icons.Default.Search, contentDescription = "No image")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = product?.productType?.uppercase() ?: "NO CATEGORY",
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.Gray
+            )
+
+            Text(
+                text = product?.title?.uppercase() ?: "NO TITLE",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            Text(
+                text = "$$price",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                IconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Red,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
 
 
 

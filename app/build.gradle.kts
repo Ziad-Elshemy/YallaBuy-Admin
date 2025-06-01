@@ -87,4 +87,18 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
+    implementation ("androidx.compose.material3:material3:1.2.0")
+
+    //Glide
+    implementation ("com.github.bumptech.glide:compose:1.0.0-beta01")
+    //Glide
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("com.github.skydoves:landscapist-glide:2.2.9")
+
+    //Koin
+    val koin_android_version = "4.0.2"
+    implementation("io.insert-koin:koin-android:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-compose-navigation:$koin_android_version")
+
 }
