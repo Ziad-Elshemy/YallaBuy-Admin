@@ -1,6 +1,7 @@
 package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
+import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.network.RemoteDataSource
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,13 @@ class RepositoryImpl(
         return remoteDataSource.getAllProducts()
     }
 
+    override suspend fun deleteProduct(id: Long): Flow<Boolean> {
+        return remoteDataSource.deleteProduct(id)
+    }
 
+    override suspend fun getProductById(id: Long): Flow<ProductsItem> {
+        return remoteDataSource.getProductById(id)
+    }
 
 
     companion object {

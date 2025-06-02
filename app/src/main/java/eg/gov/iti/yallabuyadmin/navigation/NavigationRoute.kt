@@ -38,6 +38,12 @@ sealed class NavigationRoute(val route: String) {
     object Coupons : NavigationRoute("about_screen")
     object Profile : NavigationRoute("profile_screen")
 
+    //
+    object Login : NavigationRoute("login_screen")
+    object ProductDetails : NavigationRoute("product_details_screen/{id}"){
+        fun createRoute(id: Long) = "product_details_screen/$id"
+    }
+
 }
 
 @Composable
@@ -57,79 +63,89 @@ fun BottomNavigationBar(navController: NavController) {
 
     val middleIndex = 2
 
-    Box {
-        NavigationBar(containerColor = Color(0xFFB0BEC5)) {
-            navigationItems.forEachIndexed { index, item ->
-                if (index == middleIndex) {
-                    Spacer(Modifier.weight(1f)) // horizontal space for the floating btn
-                } else {
-                    NavigationBarItem(
-                        selected = selectedNavigationIndex == index,
-                        onClick = {
-                            if (currentDestination?.destination?.route != item.route) {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = true
+
+    val shouldShowBottomNav =
+        (currentDestination?.destination?.route != NavigationRoute.Login.route &&
+                currentDestination?.destination?.route != NavigationRoute.ProductDetails.route)
+
+
+    if (shouldShowBottomNav){
+        Box {
+            NavigationBar(containerColor = Color(0xFFB0BEC5)) {
+                navigationItems.forEachIndexed { index, item ->
+                    if (index == middleIndex) {
+                        Spacer(Modifier.weight(1f)) // horizontal space for the floating btn
+                    } else {
+                        NavigationBarItem(
+                            selected = selectedNavigationIndex == index,
+                            onClick = {
+                                if (currentDestination?.destination?.route != item.route) {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                painter = item.icon,
-                                contentDescription = item.title,
-                                tint = if (index == selectedNavigationIndex)
-                                    Color(0xFF2CABAB)
-                                else
-                                    Color(0xFF4F585D)
+                            },
+                            icon = {
+                                Icon(
+                                    painter = item.icon,
+                                    contentDescription = item.title,
+                                    tint = if (index == selectedNavigationIndex)
+                                        Color(0xFF2CABAB)
+                                    else
+                                        Color(0xFF4F585D)
+                                )
+                            },
+                            label = {
+                                Text(
+                                    item.title,
+                                    color = if (index == selectedNavigationIndex)
+                                        Color(0xFF2CABAB)
+                                    else
+                                        Color(0xFF4F585D)
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color(0xFFB0BEC5)
                             )
-                        },
-                        label = {
-                            Text(
-                                item.title,
-                                color = if (index == selectedNavigationIndex)
-                                    Color(0xFF2CABAB)
-                                else
-                                    Color(0xFF4F585D)
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFB0BEC5)
                         )
-                    )
+                    }
                 }
             }
-        }
 
-        //centered dashboard btn
-        val isSelected = currentDestination?.destination?.route == NavigationRoute.Dashboard.route
+            //centered dashboard btn
+            val isSelected = currentDestination?.destination?.route == NavigationRoute.Dashboard.route
 
-        FloatingActionButton(
-            onClick = {
-                navController.navigate(NavigationRoute.Dashboard.route) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        saveState = true
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate(NavigationRoute.Dashboard.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            containerColor = Color.White,
-            elevation = FloatingActionButtonDefaults.elevation(6.dp),
-            shape = CircleShape,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-18).dp)
-        ) {
-            Icon(
-                painter = navigationItems[middleIndex].icon,
-                contentDescription = "Dashboard",
-                tint = if (isSelected) Color(0xFF2CABAB) else Color(0xFF4F585D)
-            )
-        }
+                },
+                containerColor = Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(6.dp),
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-18).dp)
+            ) {
+                Icon(
+                    painter = navigationItems[middleIndex].icon,
+                    contentDescription = "Dashboard",
+                    tint = if (isSelected) Color(0xFF2CABAB) else Color(0xFF4F585D)
+                )
+            }
 
+        }
     }
+
+
 }
 

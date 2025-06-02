@@ -9,6 +9,7 @@ import eg.gov.iti.yallabuyadmin.inventory.InventoryViewModel
 import eg.gov.iti.yallabuyadmin.network.RemoteDataSource
 import eg.gov.iti.yallabuyadmin.network.RemoteDataSourceImpl
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
+import eg.gov.iti.yallabuyadmin.productdetails.ProductDetailsViewModel
 import eg.gov.iti.yallabuyadmin.products.ProductsViewModel
 import eg.gov.iti.yallabuyadmin.profile.ProfileViewModel
 import eg.iti.mad.climaguard.repo.Repository
@@ -27,13 +28,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 val appModule = module {
 
-    single {
+    single<HttpLoggingInterceptor> {
         HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
     }
 
-    single {
+    single<OkHttpClient> {
         OkHttpClient.Builder()
             .addInterceptor(get<HttpLoggingInterceptor>())
             .addInterceptor { chain ->
@@ -51,7 +52,7 @@ val appModule = module {
             .build()
     }
 
-    single {
+    single<Retrofit> {
         Retrofit.Builder()
             .baseUrl("https://mad45-sv-and-01.myshopify.com/admin/api/2025-04/")
             .client(get())
@@ -105,6 +106,10 @@ val viewModelsModule = module {
 
     viewModel <ProfileViewModel> {
         ProfileViewModel(get())
+    }
+
+    viewModel <ProductDetailsViewModel> {
+        ProductDetailsViewModel(get())
     }
 
 }
