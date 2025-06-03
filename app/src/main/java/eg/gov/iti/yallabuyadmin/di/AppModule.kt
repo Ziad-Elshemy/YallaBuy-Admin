@@ -1,23 +1,23 @@
 package eg.gov.iti.yallabuyadmin.di
 
 import eg.gov.iti.yallabuyadmin.BuildConfig
-import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
-import eg.gov.iti.yallabuyadmin.dashboard.DashboardViewModel
-import eg.gov.iti.yallabuyadmin.database.LocalDataSource
-import eg.gov.iti.yallabuyadmin.database.LocalDataSourceImpl
-import eg.gov.iti.yallabuyadmin.inventory.InventoryViewModel
-import eg.gov.iti.yallabuyadmin.network.RemoteDataSource
-import eg.gov.iti.yallabuyadmin.network.RemoteDataSourceImpl
-import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
-import eg.gov.iti.yallabuyadmin.productdetails.ProductDetailsViewModel
-import eg.gov.iti.yallabuyadmin.products.ProductsViewModel
-import eg.gov.iti.yallabuyadmin.profile.ProfileViewModel
-import eg.iti.mad.climaguard.repo.Repository
-import eg.iti.mad.climaguard.repo.RepositoryImpl
+import eg.gov.iti.yallabuyadmin.ui.coupons.CouponsViewModel
+import eg.gov.iti.yallabuyadmin.ui.dashboard.DashboardViewModel
+import eg.gov.iti.yallabuyadmin.data.repository.LocalDataSource
+import eg.gov.iti.yallabuyadmin.data.datasource.local.LocalDataSourceImpl
+import eg.gov.iti.yallabuyadmin.ui.inventory.InventoryViewModel
+import eg.gov.iti.yallabuyadmin.data.repository.RemoteDataSource
+import eg.gov.iti.yallabuyadmin.data.datasource.remote.RemoteDataSourceImpl
+import eg.gov.iti.yallabuyadmin.data.datasource.remote.api.ShopifyApi
+import eg.gov.iti.yallabuyadmin.ui.productdetails.ProductDetailsViewModel
+import eg.gov.iti.yallabuyadmin.ui.products.ProductsViewModel
+import eg.gov.iti.yallabuyadmin.ui.profile.ProfileViewModel
+import eg.gov.iti.yallabuyadmin.domain.repository.Repository
+import eg.gov.iti.yallabuyadmin.data.repository.RepositoryImpl
+import eg.gov.iti.yallabuyadmin.domain.usecase.GetAllProductsToAdmin
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -79,6 +79,10 @@ val appModule = module {
 
     single <Repository>{
         RepositoryImpl.getInstance(get(),get())
+    }
+
+    single <GetAllProductsToAdmin>{
+        GetAllProductsToAdmin(get())
     }
 
 
