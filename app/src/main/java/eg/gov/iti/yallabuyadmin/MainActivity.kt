@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
 
                     val graph =
-                        navController.createGraph(startDestination = NavigationRoute.Login.route) {
+                        navController.createGraph(startDestination = NavigationRoute.Dashboard.route) {
 
                             composable(route = NavigationRoute.Products.route) {
                                 val productsViewModel : ProductsViewModel = koinViewModel()

@@ -2,6 +2,7 @@ package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
+import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -17,8 +18,20 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         return flowOf(response.isSuccessful)
     }
 
-    override suspend fun getProductById(id: Long): Flow<ProductsItem> {
+    override suspend fun getProductById(id: Long): Flow<ProductsItem?> {
         val response = services.getProductById(id)
-        return flowOf(response)
+        return flowOf(response.product)
+    }
+
+    override suspend fun updateProduct(
+        id: Long,
+        productBody: UpdateProductRequest
+    ): Flow<ProductsItem?> {
+        val response = services.updateProduct(id,productBody)
+        if (response.isSuccessful) {
+            return flowOf(response.body())
+        } else {
+            throw Exception("Update failed with code ${response.code()}")
+        }
     }
 }
