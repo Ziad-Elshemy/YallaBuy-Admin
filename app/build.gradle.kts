@@ -95,6 +95,9 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.github.skydoves:landscapist-glide:2.2.9")
 
+    //Async image
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     //Koin
     val koin_android_version = "4.0.2"
     implementation("io.insert-koin:koin-android:$koin_android_version")

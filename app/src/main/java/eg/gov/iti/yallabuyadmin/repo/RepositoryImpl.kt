@@ -1,6 +1,8 @@
 package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
+import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -32,6 +34,14 @@ class RepositoryImpl(
         productBody: UpdateProductRequest
     ): Flow<ProductsItem?> {
         return remoteDataSource.updateProduct(id,productBody)
+    }
+
+    override suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?> {
+        return remoteDataSource.addProductImage(id,imageBody)
+    }
+
+    override suspend fun deleteProductImage(productId: Long, imageId: Long): Flow<Unit?> {
+        return remoteDataSource.deleteProductImage(productId,imageId)
     }
 
 

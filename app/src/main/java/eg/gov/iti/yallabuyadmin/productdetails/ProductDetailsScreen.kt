@@ -3,9 +3,11 @@ package eg.gov.iti.yallabuyadmin.productdetails
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +37,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
@@ -50,12 +53,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.skydoves.landscapist.glide.GlideImage
+import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -111,7 +117,19 @@ fun ProductDetailsScreen(navController: NavController,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
-                    ){ updatedProduct ->
+                    , onAddNewImageClick = { imageRequest ->
+                        viewModel.addImageToProduct(
+                            productId = productId,
+                            body = AddImageRequest(
+                                image = imageRequest
+                            )
+                        )
+                                           },
+                        onDeleteClick = { imgId ->
+                          viewModel.deleteProductImage(productId,imgId)
+                        }
+                        )
+                    { updatedProduct ->
                         viewModel.updateProductDetails(
                             productId = productId,
                             body = UpdateProductRequest(
@@ -152,115 +170,20 @@ fun ProductDetailsScreen(navController: NavController,
 }
 
 
-//@Composable
-//fun ProductDetailsScreenUI(
-//    modifier: Modifier,
-//    product: ProductsItem?,
-//    onUpdateClick: (ProductsItem) -> Unit
-//) {
-//    var title by remember { mutableStateOf(product?.title ?: "") }
-//    var price by remember { mutableStateOf(product?.variants?.firstOrNull()?.price ?: "") }
-//    var quantity by remember { mutableStateOf(product?.variants?.firstOrNull()?.inventoryQuantity?.toString() ?: "") }
-//    var productType by remember { mutableStateOf(product?.productType ?: "") }
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp)
-//            .verticalScroll(rememberScrollState()),
-//        verticalArrangement = Arrangement.spacedBy(16.dp)
-//    ) {
-//
-//        if (!product?.image?.src.isNullOrEmpty()) {
-//            GlideImage(
-//                imageModel = { product!!.image!!.src },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(200.dp)
-//                    .clip(RoundedCornerShape(12.dp)),
-//                loading = {
-//                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
-//                },
-//                failure = {
-//                    Icon(Icons.Default.Build, contentDescription = null)
-//                }
-//            )
-//        }
-//
-//        // name
-//        OutlinedTextField(
-//            value = title,
-//            onValueChange = { title = it },
-//            label = { Text("Product Title") },
-//            singleLine = true,
-//            modifier = Modifier.fillMaxWidth()
-//        )
-//
-//        // price
-//        OutlinedTextField(
-//            value = price,
-//            onValueChange = { price = it },
-//            label = { Text("Price") },
-//            singleLine = true,
-//            modifier = Modifier.fillMaxWidth(),
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-//        )
-//
-//        // Quantity
-//        OutlinedTextField(
-//            value = quantity,
-//            onValueChange = { quantity = it },
-//            label = { Text("Quantity") },
-//            singleLine = true,
-//            modifier = Modifier.fillMaxWidth(),
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-//        )
-//
-//        // Type
-//        OutlinedTextField(
-//            value = productType,
-//            onValueChange = { productType = it },
-//            label = { Text("Product Type") },
-//            singleLine = true,
-//            modifier = Modifier.fillMaxWidth()
-//        )
-//
-//        // Update Button
-//        Button(
-//            onClick = {
-//                val updatedProduct = product?.copy(
-//                    title = title,
-//                    productType = productType,
-//                    variants = listOf(
-//                        product.variants?.firstOrNull()?.copy(
-//                            price = price,
-//                            inventoryQuantity = quantity.toIntOrNull() ?: 0
-//                        ) ?: VariantsItem()
-//                    )
-//                )
-//                updatedProduct?.let { onUpdateClick(it) }
-//            },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(48.dp),
-//            shape = RoundedCornerShape(8.dp)
-//        ) {
-//            Text("Update Product")
-//        }
-//    }
-//}
-
 @Composable
 fun ProductDetailsScreenUI(
     modifier: Modifier,
     product: ProductsItem? ,
+    onAddNewImageClick: (ImagesItem) -> Unit,
+    onDeleteClick: (Long) -> Unit,
     onUpdateClick: (ProductsItem) -> Unit
 ) {
+    var newImgUrl by remember { mutableStateOf( "") }
     var title by remember { mutableStateOf(product?.title ?: "") }
     var price by remember { mutableStateOf(product?.variants?.firstOrNull()?.price ?: "") }
     var quantity by remember { mutableStateOf(product?.variants?.firstOrNull()?.inventoryQuantity?.toString() ?: "") }
     var productType by remember { mutableStateOf(product?.productType ?: "") }
-    var productImages by remember { mutableStateOf(product?.images ?: emptyList()) }
+//    var productImages by remember { mutableStateOf(product?.images ?: emptyList()) }
 
     Column(
         modifier = Modifier
@@ -271,12 +194,82 @@ fun ProductDetailsScreenUI(
     ) {
 
         LazyRow {
-            items(productImages){ imgUrl ->
+            items(product?.images ?: emptyList()){ imageItem ->
 
-                ProductImageItem(imgUrl?.src ?: "")
+                if (imageItem != null) {
+                    ProductImageItem(
+                        imgItem = imageItem,
+                        onDeleteClick = onDeleteClick
+                    )
+                }
+
 
             }
         }
+
+        // image url
+        Row {
+
+            OutlinedTextField(
+                value = newImgUrl,
+                onValueChange = { newImgUrl = it },
+                label = { Text("add new Image") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(fraction = 0.85f)
+            )
+
+            // Add New Image Button
+//            Button(
+//                onClick = {
+//                    val imageRequest = ImagesItem(
+//                        src = newImgUrl
+//                    )
+//                    imageRequest.let {
+//                        onAddNewImageClick(imageRequest)
+//                        newImgUrl = ""
+//                    }
+//                },
+//                modifier = Modifier
+//                    .fillMaxSize(),
+//                shape = RoundedCornerShape(8.dp)
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.Add,
+//                    contentDescription = null
+//                )
+//            }
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(40.dp)
+                    .offset(x = 2.dp, y = 2.dp)
+                    .shadow(
+                        elevation = 6.dp,
+                        shape = CircleShape,
+                        clip = false
+                    )
+                    .background(Color.White)
+                    .align(Alignment.CenterVertically)
+                    .clickable(onClick = {
+                        val imageRequest = ImagesItem(
+                            src = newImgUrl
+                        )
+                        imageRequest.let {
+                            onAddNewImageClick(imageRequest)
+                            newImgUrl = ""
+                        }
+                    }),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Delete",
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
 
         // name
         OutlinedTextField(
@@ -344,7 +337,10 @@ fun ProductDetailsScreenUI(
 
 
 @Composable
-fun ProductImageItem(imgUrl: String) {
+fun ProductImageItem(
+    imgItem: ImagesItem,
+    onDeleteClick: (Long) -> Unit
+) {
 
     Box (modifier = Modifier.padding(4.dp)){
         Log.e("ProductItem", "ProductItem: id = ", )
@@ -379,9 +375,9 @@ fun ProductImageItem(imgUrl: String) {
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (!imgUrl.isNullOrEmpty()) {
+                    if (!imgItem.src.isNullOrEmpty()) {
                         GlideImage(
-                            imageModel = { imgUrl },
+                            imageModel = { imgItem.src },
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(RoundedCornerShape(10.dp)),
@@ -414,8 +410,12 @@ fun ProductImageItem(imgUrl: String) {
                 )
                 .clip(CircleShape)
                 .background(Color.White)
-                .align(Alignment.TopEnd),
-//                .clickable(onClick = onDeleteClick),
+                .align(Alignment.TopEnd)
+                .clickable(onClick = {
+                    if (imgItem.id != null) {
+                        onDeleteClick(imgItem.id)
+                    }
+                }),
             contentAlignment = Alignment.Center
         ) {
             Icon(

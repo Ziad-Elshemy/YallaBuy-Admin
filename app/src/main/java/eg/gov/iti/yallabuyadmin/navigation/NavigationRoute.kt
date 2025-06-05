@@ -44,6 +44,8 @@ sealed class NavigationRoute(val route: String) {
         fun createRoute(id: Long) = "product_details_screen/$id"
     }
 
+    object CreateProduct : NavigationRoute("create_product_screen")
+
 }
 
 @Composable
@@ -66,7 +68,8 @@ fun BottomNavigationBar(navController: NavController) {
 
     val shouldShowBottomNav =
         (currentDestination?.destination?.route != NavigationRoute.Login.route &&
-                currentDestination?.destination?.route != NavigationRoute.ProductDetails.route)
+                currentDestination?.destination?.route != NavigationRoute.ProductDetails.route &&
+                currentDestination?.destination?.route != NavigationRoute.CreateProduct.route)
 
 
     if (shouldShowBottomNav){

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -55,6 +56,41 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
                         fetchProductById(productId)
                     } else {
                         _toastMessage.emit("Update failed: empty response")
+                    }
+                }
+        }
+    }
+
+    fun addImageToProduct(productId: Long, body: AddImageRequest){
+        viewModelScope.launch {
+            repo.addProductImage(productId,body)
+                .catch { ex ->
+                    _toastMessage.emit("add image failed ${ex.message}")
+                }
+                .collect{ imageItem ->
+                    if (imageItem != null){
+                        _toastMessage.emit("Image added successfully")
+                        fetchProductById(productId)
+                    } else {
+                        _toastMessage.emit("failed: empty response")
+                    }
+                }
+        }
+    }
+
+    fun deleteProductImage(productId: Long, imageId: Long){
+        viewModelScope.launch {
+            val response = repo.deleteProductImage(productId,imageId)
+            response
+                .catch { ex ->
+                    _toastMessage.emit("delete image failed ${ex.message}")
+                }
+                .collect { unit ->
+                    if (unit != null){
+                        _toastMessage.emit("Image deleted successfully")
+                        fetchProductById(productId)
+                    } else {
+                        _toastMessage.emit("failed: empty response")
                     }
                 }
         }

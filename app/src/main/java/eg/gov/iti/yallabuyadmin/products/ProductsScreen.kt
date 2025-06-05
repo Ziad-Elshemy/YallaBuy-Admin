@@ -107,7 +107,7 @@ fun ProductsScreen(navController: NavController, viewModel: ProductsViewModel) {
                         Icon(Icons.Default.Search, contentDescription = "Search")
                     }
 
-                    IconButton(onClick = { navController.navigate("addProduct") }) {
+                    IconButton(onClick = { navController.navigate(NavigationRoute.CreateProduct.route) }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Product")
                     }
                 }
