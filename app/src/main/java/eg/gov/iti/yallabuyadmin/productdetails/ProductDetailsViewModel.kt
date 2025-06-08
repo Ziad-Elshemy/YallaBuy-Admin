@@ -2,18 +2,19 @@ package eg.gov.iti.yallabuyadmin.productdetails
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.utils.Constants.SHOPIFY_LOCATION_ID
 import eg.iti.mad.climaguard.repo.Repository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 
@@ -26,6 +27,49 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
 
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage = _toastMessage.asSharedFlow()
+
+    private val _vendors = MutableStateFlow<Response<List<String>>>(Response.Loading)
+    val vendors = _vendors.asStateFlow()
+
+    private val _productTypes = MutableStateFlow<Response<List<String>>>(Response.Loading)
+    val productTypes = _productTypes.asStateFlow()
+
+    fun loadInitialData() {
+        getAllVendors()
+        getAllProductTypes()
+    }
+
+    private fun getAllVendors() {
+        viewModelScope.launch {
+            repo.getAllVendors()
+                .catch { _vendors.value = Response.Failure(it) }
+                .map { response ->
+                    response.products
+                        ?.mapNotNull { it?.vendor }
+                        ?.distinct()
+                        ?: emptyList()
+                }
+                .collect { vendorsList ->
+                    _vendors.value = Response.Success(vendorsList)
+                }
+        }
+    }
+
+    private fun getAllProductTypes() {
+        viewModelScope.launch {
+            repo.getAllProductTypes()
+                .catch { _productTypes.value = Response.Failure(it) }
+                .map { response ->
+                    response.products
+                        ?.mapNotNull { it?.productType }
+                        ?.distinct()
+                        ?: emptyList()
+                }
+                .collect { productTypesList ->
+                    _productTypes.value = Response.Success(productTypesList)
+                }
+        }
+    }
 
     fun fetchProductById(id: Long) {
         viewModelScope.launch {
@@ -53,6 +97,38 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
                     if (updatedProduct != null) {
                         Log.d("UpdateProduct", "Product updated: ${updatedProduct.title}")
                         _toastMessage.emit("Product updated successfully")
+
+                        body.product.variants?.forEach {
+                            Log.d(TAG, "updateProductDetails: ${it?.inventoryQuantity}")
+                        }
+
+
+
+                        val updatedVariants = updatedProduct.variants ?: emptyList()
+                        val requestedVariants = body.product.variants ?: emptyList()
+
+                        updatedVariants.zip(requestedVariants).forEach { (shopifyVariant, inputVariant) ->
+                            val inventoryItemId = shopifyVariant?.inventoryItemId
+                            val quantity = inputVariant?.inventoryQuantity
+
+                            if (inventoryItemId != null && quantity != null) {
+                                repo.setInventory(
+                                    locationId = SHOPIFY_LOCATION_ID,
+                                    inventoryItemId = inventoryItemId,
+                                    available = quantity
+                                )
+                                    .catch {
+//                                        _toastMessage.emit("Update failed: ${it.message}")
+                                        Log.e(TAG, "updateProductDetails: error = ${it.localizedMessage}", )
+                                    }
+                                    .collect { res ->
+//                                        _toastMessage.emit("Inventory updated successfully q = $res")
+                                        Log.d(TAG, "updateProductDetails: quantity = $res")
+                                    }
+                            }
+                        }
+
+
                         fetchProductById(productId)
                     } else {
                         _toastMessage.emit("Update failed: empty response")
@@ -60,6 +136,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
                 }
         }
     }
+
 
     fun addImageToProduct(productId: Long, body: AddImageRequest){
         viewModelScope.launch {

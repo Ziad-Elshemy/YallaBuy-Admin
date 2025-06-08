@@ -1,7 +1,6 @@
 package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
-import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
@@ -18,6 +17,9 @@ interface Repository {
     suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?>
     suspend fun deleteProductImage(productId: Long, imageId: Long): Flow<Unit?>
     suspend fun createProduct(product: ProductsItem): Flow<ProductsItem>
+    suspend fun getAllVendors(): Flow<ProductsResponse>
+    suspend fun getAllProductTypes(): Flow<ProductsResponse>
+    suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int>
 
 
 }

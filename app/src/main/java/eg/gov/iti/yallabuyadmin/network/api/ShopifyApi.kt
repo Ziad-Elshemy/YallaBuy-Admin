@@ -3,7 +3,10 @@ package eg.gov.iti.yallabuyadmin.network.api
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
+import eg.gov.iti.yallabuyadmin.model.InventoryLevelResponse
 import eg.gov.iti.yallabuyadmin.model.ProductByIdResponse
+import eg.gov.iti.yallabuyadmin.model.ProductWrapper
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -36,7 +39,7 @@ interface ShopifyApi {
     suspend fun updateProduct(
         @Path("id") productId: Long,
         @Body productBody: UpdateProductRequest
-    ): Response<ProductsItem>
+    ): Response<ProductWrapper>
 
 
     // add image to product
@@ -60,5 +63,15 @@ interface ShopifyApi {
         @Body request: CreateProductRequest
     ): Response<ProductsItem>
 
+    @GET("products.json?fields=vendor")
+    suspend fun getVendors(): ProductsResponse
+
+    @GET("products.json?fields=product_type")
+    suspend fun getProductTypes(): ProductsResponse
+
+    @POST("inventory_levels/set.json")
+    suspend fun setInventory(
+        @Body body: InventorySetRequest
+    ): Response<InventoryLevelResponse>
 
 }

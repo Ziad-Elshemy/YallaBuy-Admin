@@ -3,6 +3,7 @@ package eg.gov.iti.yallabuyadmin.network
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -33,7 +34,7 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
     ): Flow<ProductsItem?> {
         val response = services.updateProduct(id,productBody)
         if (response.isSuccessful) {
-            return flowOf(response.body())
+            return flowOf(response.body()?.product)
         } else {
             throw Exception("Update failed with code ${response.code()}")
         }
@@ -55,6 +56,34 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
             return flowOf(response.body())
         } else {
             throw Exception("Delete image failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun getAllVendors(): Flow<ProductsResponse> {
+        val response = services.getVendors()
+        return flowOf(response)
+    }
+
+    override suspend fun getAllProductTypes(): Flow<ProductsResponse> {
+        val response = services.getProductTypes()
+        return flowOf(response)
+    }
+
+    override suspend fun setInventory(
+        locationId: Long,
+        inventoryItemId: Long,
+        available: Int
+    ): Flow<Int> = flow {
+        val body = InventorySetRequest(
+            locationId = locationId,
+            inventoryItemId = inventoryItemId,
+            available = available
+        )
+        val response = services.setInventory(body)
+        if (response.isSuccessful) {
+            emit(response.body()?.inventoryLevel?.available ?: 0)
+        } else {
+            throw Exception("Set inventory failed with code ${response.code()}")
         }
     }
 

@@ -2,7 +2,6 @@ package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
-import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
@@ -49,6 +48,17 @@ class RepositoryImpl(
         return remoteDataSource.createProduct(product)
     }
 
+    override suspend fun getAllVendors(): Flow<ProductsResponse> {
+        return remoteDataSource.getAllVendors()
+    }
+
+    override suspend fun getAllProductTypes(): Flow<ProductsResponse> {
+        return remoteDataSource.getAllProductTypes()
+    }
+
+    override suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int> {
+        return remoteDataSource.setInventory(locationId, inventoryItemId, available)
+    }
 
     companion object {
         private var INSTANCE: RepositoryImpl? = null

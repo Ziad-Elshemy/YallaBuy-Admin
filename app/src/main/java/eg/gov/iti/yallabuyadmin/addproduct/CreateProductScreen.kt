@@ -70,10 +70,10 @@ fun CreateProductScreen(
     viewModel: CreateProductViewModel
 ){
 
-//    Log.e("ProductDetailsScreen", "ProductDetailsScreen: productId = $productId", )
-
+    val vendorsState by viewModel.vendors.collectAsStateWithLifecycle()
+    val productTypesState by viewModel.productTypes.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-//        viewModel.fetchProductById(productId)
+        viewModel.loadInitialData()
     }
 
     val uiState by viewModel.createState.collectAsStateWithLifecycle()
@@ -101,32 +101,31 @@ fun CreateProductScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            CreateProductUI(
-                onSubmit = {product ->
-                    viewModel.createProduct(product)
-                },
-                vendors = listOf("vendor1","vendor2"),
-                productTypes = listOf("type1","type2", "type3")
-            )
 
-            when (uiState) {
-                is Response.Loading -> {
-//                    LoadingIndicator()
+
+            when {
+                vendorsState is Response.Loading || productTypesState is Response.Loading -> {
+                    LoadingIndicator()
                 }
 
-                is Response.Success -> {
+                vendorsState is Response.Failure || productTypesState is Response.Failure -> {
 
-                    Log.d("CreateProductScreen", "added successfully: ")
-
-                }
-
-                is Response.Failure -> {
-                    Text(
-                        text = "Failed to create product",
+                    Text(text = "Failed to create product",
                         modifier = Modifier
                             .fillMaxSize()
                             .wrapContentSize(),
-                        fontSize = 22.sp
+                        fontSize = 22.sp,
+                        color = Color.Red)
+
+                }
+
+                vendorsState is Response.Success && productTypesState is Response.Success -> {
+                    CreateProductUI(
+                        vendors = (vendorsState as Response.Success<List<String>>).data,
+                        productTypes = (productTypesState as Response.Success<List<String>>).data,
+                        onSubmit = {product ->
+                            viewModel.createProduct(product)
+                        }
                     )
                 }
 
