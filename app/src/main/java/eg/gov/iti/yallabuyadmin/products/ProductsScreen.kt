@@ -62,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.skydoves.landscapist.glide.GlideImage
@@ -107,7 +108,7 @@ fun ProductsScreen(navController: NavController, viewModel: ProductsViewModel) {
                         Icon(Icons.Default.Search, contentDescription = "Search")
                     }
 
-                    IconButton(onClick = { navController.navigate("addProduct") }) {
+                    IconButton(onClick = { navController.navigate(NavigationRoute.CreateProduct.route) }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Product")
                     }
                 }
@@ -203,7 +204,7 @@ fun ProductsList(
         columns = GridCells.Fixed(2),
         modifier = Modifier.padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         items(products ?: emptyList()) { product ->
             ProductItem(
@@ -223,6 +224,8 @@ fun ProductItem(
 ) {
     val imageUrl = product?.images?.firstOrNull()?.src
     val price = product?.variants?.firstOrNull()?.price ?: "0.00"
+    val quantity = product?.variants?.firstOrNull()?.inventoryQuantity ?: 0
+
 
     Box (modifier = Modifier.padding(4.dp)){
         Log.e("ProductItem", "ProductItem: id = ${product?.id}", )
@@ -236,8 +239,8 @@ fun ProductItem(
                         )
                     )
                 }
-                .width(180.dp)
-                .height(220.dp)
+                .width(220.dp)
+                .height(240.dp)
                 .padding(4.dp),
             colors = CardColors(containerColor = Color.White,
                 contentColor = Color.Black,
@@ -301,6 +304,19 @@ fun ProductItem(
                 )
 
 
+                Text(
+                    text = when {
+                        quantity == 0 -> "Out of stock"
+                        quantity <= 5 -> "⚠Low stock ($quantity)"
+                        else -> "In stock ($quantity)"
+                    },
+                    color = when {
+                        quantity == 0 -> Color.Red
+                        quantity <= 5 -> Color(0xFFFFA500)
+                        else -> Color(0xFF4CAF50)
+                    },
+                    fontWeight = FontWeight.SemiBold
+                )
 
 
             }

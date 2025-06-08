@@ -1,9 +1,15 @@
 package eg.gov.iti.yallabuyadmin.network
 
+import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
+import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
 class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
@@ -17,8 +23,76 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         return flowOf(response.isSuccessful)
     }
 
-    override suspend fun getProductById(id: Long): Flow<ProductsItem> {
+    override suspend fun getProductById(id: Long): Flow<ProductsItem?> {
         val response = services.getProductById(id)
+        return flowOf(response.product)
+    }
+
+    override suspend fun updateProduct(
+        id: Long,
+        productBody: UpdateProductRequest
+    ): Flow<ProductsItem?> {
+        val response = services.updateProduct(id,productBody)
+        if (response.isSuccessful) {
+            return flowOf(response.body()?.product)
+        } else {
+            throw Exception("Update failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?> {
+        val response = services.addProductImage(id,imageBody)
+        if (response.isSuccessful){
+            return flowOf(response.body())
+        }
+        else{
+            throw Exception("Add image failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun deleteProductImage(productId: Long, imageId: Long): Flow<Unit?> {
+        val response = services.deleteProductImage(productId,imageId)
+        if (response.isSuccessful){
+            return flowOf(response.body())
+        } else {
+            throw Exception("Delete image failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun getAllVendors(): Flow<ProductsResponse> {
+        val response = services.getVendors()
         return flowOf(response)
+    }
+
+    override suspend fun getAllProductTypes(): Flow<ProductsResponse> {
+        val response = services.getProductTypes()
+        return flowOf(response)
+    }
+
+    override suspend fun setInventory(
+        locationId: Long,
+        inventoryItemId: Long,
+        available: Int
+    ): Flow<Int> = flow {
+        val body = InventorySetRequest(
+            locationId = locationId,
+            inventoryItemId = inventoryItemId,
+            available = available
+        )
+        val response = services.setInventory(body)
+        if (response.isSuccessful) {
+            emit(response.body()?.inventoryLevel?.available ?: 0)
+        } else {
+            throw Exception("Set inventory failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem> = flow{
+        val response = services.createProduct(CreateProductRequest(product))
+        if (response.isSuccessful){
+            response.body()?.let { emit(it) }
+        } else {
+            throw Exception("Create product failed with code ${response.code()}")
+        }
     }
 }

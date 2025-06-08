@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import eg.gov.iti.yallabuyadmin.addproduct.CreateProductScreen
+import eg.gov.iti.yallabuyadmin.addproduct.CreateProductViewModel
 import eg.gov.iti.yallabuyadmin.coupons.CouponsScreen
 import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardScreen
@@ -50,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
 
                     val graph =
-                        navController.createGraph(startDestination = NavigationRoute.Login.route) {
+                        navController.createGraph(startDestination = NavigationRoute.Dashboard.route) {
 
                             composable(route = NavigationRoute.Products.route) {
                                 val productsViewModel : ProductsViewModel = koinViewModel()
@@ -82,6 +84,11 @@ class MainActivity : ComponentActivity() {
                                     ?.toLongOrNull() ?: 11916346917182
                                 val productDetailsViewModel : ProductDetailsViewModel = koinViewModel()
                                 ProductDetailsScreen(navController,productDetailsViewModel, productId)
+                            }
+
+                            composable(route = NavigationRoute.CreateProduct.route) {
+                                val createProductViewModel : CreateProductViewModel = koinViewModel()
+                                CreateProductScreen(navController,createProductViewModel)
                             }
 
                         }
