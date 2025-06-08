@@ -1,12 +1,14 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
 class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
@@ -53,6 +55,15 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
             return flowOf(response.body())
         } else {
             throw Exception("Delete image failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem> = flow{
+        val response = services.createProduct(CreateProductRequest(product))
+        if (response.isSuccessful){
+            response.body()?.let { emit(it) }
+        } else {
+            throw Exception("Create product failed with code ${response.code()}")
         }
     }
 }

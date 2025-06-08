@@ -104,4 +104,8 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
     implementation("io.insert-koin:koin-androidx-compose-navigation:$koin_android_version")
 
+
+    implementation("com.google.accompanist:accompanist-flowlayout:0.34.0")
+
+
 }

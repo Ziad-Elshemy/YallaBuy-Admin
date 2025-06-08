@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network.api
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.ProductByIdResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
@@ -52,6 +53,12 @@ interface ShopifyApi {
         @Path("product_id") productId: Long,
         @Path("image_id") imageId: Long
     ): Response<Unit>
+
+    //create product
+    @POST("products.json")
+    suspend fun createProduct(
+        @Body request: CreateProductRequest
+    ): Response<ProductsItem>
 
 
 }
