@@ -3,6 +3,7 @@ package eg.iti.mad.climaguard.repo
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -58,6 +59,10 @@ class RepositoryImpl(
 
     override suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int> {
         return remoteDataSource.setInventory(locationId, inventoryItemId, available)
+    }
+
+    override suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>> {
+        return remoteDataSource.getAllPriceRules()
     }
 
     companion object {

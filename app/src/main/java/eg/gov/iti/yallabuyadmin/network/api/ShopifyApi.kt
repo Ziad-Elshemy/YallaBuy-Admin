@@ -5,6 +5,7 @@ import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.InventoryLevelResponse
+import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductByIdResponse
 import eg.gov.iti.yallabuyadmin.model.ProductWrapper
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
@@ -73,5 +74,9 @@ interface ShopifyApi {
     suspend fun setInventory(
         @Body body: InventorySetRequest
     ): Response<InventoryLevelResponse>
+
+
+    @GET("price_rules.json")
+    suspend fun getAllPriceRules(): Response<PriceRulesResponse>
 
 }

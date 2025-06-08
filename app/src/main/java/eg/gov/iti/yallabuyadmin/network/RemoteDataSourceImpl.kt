@@ -4,6 +4,8 @@ import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
+import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
+import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -11,6 +13,7 @@ import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import retrofit2.Response
 
 class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
     override suspend fun getAllProducts(): Flow<ProductsResponse> {
@@ -93,6 +96,17 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
             response.body()?.let { emit(it) }
         } else {
             throw Exception("Create product failed with code ${response.code()}")
+        }
+    }
+
+    override suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>> = flow {
+        val response: Response<PriceRulesResponse> = services.getAllPriceRules()
+        if (response.isSuccessful){
+            val body = response.body()
+            val rules = body?.priceRules?.filterNotNull() ?: emptyList()
+            emit(rules)
+        }else{
+            throw Exception("Get Price Rules failed with code ${response.code()}")
         }
     }
 }

@@ -2,6 +2,7 @@ package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
@@ -20,5 +21,8 @@ interface RemoteDataSource {
     suspend fun getAllVendors(): Flow<ProductsResponse>
     suspend fun getAllProductTypes(): Flow<ProductsResponse>
     suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int>
+
+    //
+    suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>>
 
 }
