@@ -1,26 +1,35 @@
 package eg.gov.iti.yallabuyadmin
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import androidx.navigation.navArgument
 import eg.gov.iti.yallabuyadmin.addproduct.CreateProductScreen
 import eg.gov.iti.yallabuyadmin.addproduct.CreateProductViewModel
 import eg.gov.iti.yallabuyadmin.coupons.CouponsScreen
 import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardScreen
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardViewModel
+import eg.gov.iti.yallabuyadmin.editpricerule.EditPriceRuleScreen
+import eg.gov.iti.yallabuyadmin.editpricerule.EditPriceRuleViewModel
 import eg.gov.iti.yallabuyadmin.inventory.InventoryScreen
 import eg.gov.iti.yallabuyadmin.inventory.InventoryViewModel
 import eg.gov.iti.yallabuyadmin.login.LoginScreen
+import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.navigation.BottomNavigationBar
 import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
 import eg.gov.iti.yallabuyadmin.productdetails.ProductDetailsScreen
@@ -36,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
     private val TAG = "MainActivity"
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -90,6 +100,28 @@ class MainActivity : ComponentActivity() {
                                 val createProductViewModel : CreateProductViewModel = koinViewModel()
                                 CreateProductScreen(navController,createProductViewModel)
                             }
+
+                            composable(route = NavigationRoute.EditPriceRule.route) {
+                                val editViewModel: EditPriceRuleViewModel = koinViewModel()
+
+                                val priceRule = remember {
+                                    navController.previousBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.get<PriceRulesItem>("selected_rule")
+                                }
+
+                                if (priceRule != null) {
+                                    EditPriceRuleScreen(
+                                        navController = navController,
+                                        viewModel = editViewModel,
+                                        priceRule = priceRule
+                                    )
+                                } else {
+                                    Text("No Price Rule Selected")
+                                }
+                            }
+
+
 
                         }
                     NavHost(

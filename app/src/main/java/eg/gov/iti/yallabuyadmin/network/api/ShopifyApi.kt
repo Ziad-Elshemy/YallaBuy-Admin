@@ -5,11 +5,13 @@ import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.InventoryLevelResponse
+import eg.gov.iti.yallabuyadmin.model.PriceRuleResponseWrapper
 import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductByIdResponse
 import eg.gov.iti.yallabuyadmin.model.ProductWrapper
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
+import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -78,5 +80,12 @@ interface ShopifyApi {
 
     @GET("price_rules.json")
     suspend fun getAllPriceRules(): Response<PriceRulesResponse>
+
+    @PUT("price_rules/{id}.json")
+    suspend fun updatePriceRule(
+        @Path("id") ruleId: Long,
+        @Body body: UpdatePriceRuleRequest
+    ): Response<PriceRuleResponseWrapper>
+
 
 }

@@ -25,4 +25,6 @@ interface RemoteDataSource {
     //
     suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>>
 
+    suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem>
+
 }

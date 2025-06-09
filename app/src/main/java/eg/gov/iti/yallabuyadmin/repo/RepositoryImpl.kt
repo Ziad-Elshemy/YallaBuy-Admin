@@ -65,6 +65,10 @@ class RepositoryImpl(
         return remoteDataSource.getAllPriceRules()
     }
 
+    override suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem> {
+        return remoteDataSource.updatePriceRule(id, rule)
+    }
+
     companion object {
         private var INSTANCE: RepositoryImpl? = null
         fun getInstance(localDataSource: LocalDataSource, remoteDataSource: RemoteDataSource): RepositoryImpl{

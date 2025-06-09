@@ -47,6 +47,7 @@ import androidx.navigation.NavController
 import eg.gov.iti.yallabuyadmin.R
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.Response
+import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
 import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 
 
@@ -86,8 +87,9 @@ fun CouponsScreen(navController: NavController, viewModel: CouponsViewModel) {
                     val rules = (uiState as Response.Success<List<PriceRulesItem>>).data
                     PriceRulesScreen(
                         rules = rules,
-                        onEditClick = {
-//                            navController.navigate("editPriceRule/${it.id}")
+                        onEditClick = { rule ->
+                            navController.currentBackStackEntry?.savedStateHandle?.set("selected_rule", rule)
+                            navController.navigate(NavigationRoute.EditPriceRule.route)
                         }
                     )
                 }

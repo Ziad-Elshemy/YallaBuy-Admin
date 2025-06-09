@@ -8,6 +8,7 @@ import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
+import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
@@ -109,4 +110,22 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
             throw Exception("Get Price Rules failed with code ${response.code()}")
         }
     }
+
+    override suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem> = flow {
+        val response = services.updatePriceRule(id, UpdatePriceRuleRequest(rule))
+        if (response.isSuccessful) {
+            response.body()?.priceRule?.let { emit(it) }
+        } else {
+            throw Exception("Update failed: ${response.code()}")
+        }
+    }
+
+
+
+
+
+
+
+
+
 }

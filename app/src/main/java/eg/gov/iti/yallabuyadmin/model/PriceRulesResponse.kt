@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.model
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class PriceRulesResponse(
 
@@ -17,7 +18,7 @@ data class PriceRulesItem(
 	val oncePerCustomer: Boolean? = null,
 
 	@field:SerializedName("usage_limit")
-	val usageLimit: Any? = null,
+	val usageLimit: String? = null,
 
 	@field:SerializedName("starts_at")
 	val startsAt: String? = null,
@@ -99,7 +100,7 @@ data class PriceRulesItem(
 
 	@field:SerializedName("prerequisite_collection_ids")
 	val prerequisiteCollectionIds: List<Any?>? = null
-)
+) : Serializable
 
 data class PrerequisiteToEntitlementPurchase(
 
