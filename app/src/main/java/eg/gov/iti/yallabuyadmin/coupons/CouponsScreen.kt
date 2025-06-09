@@ -87,6 +87,7 @@ fun CouponsScreen(navController: NavController, viewModel: CouponsViewModel) {
                     val rules = (uiState as Response.Success<List<PriceRulesItem>>).data
                     PriceRulesScreen(
                         rules = rules,
+                        navController = navController,
                         onEditClick = { rule ->
                             navController.currentBackStackEntry?.savedStateHandle?.set("selected_rule", rule)
                             navController.navigate(NavigationRoute.EditPriceRule.route)
@@ -111,6 +112,7 @@ fun CouponsScreen(navController: NavController, viewModel: CouponsViewModel) {
 @Composable
 fun PriceRulesScreen(
     rules: List<PriceRulesItem>,
+    navController: NavController,
     onEditClick: (PriceRulesItem) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -123,7 +125,9 @@ fun PriceRulesScreen(
                 IconButton(onClick = { /* Search Click */ }) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
-                IconButton(onClick = { /* Add New Rule */ }) {
+                IconButton(onClick = {
+                    navController.navigate(NavigationRoute.CreatePriceRule.route)
+                }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             }

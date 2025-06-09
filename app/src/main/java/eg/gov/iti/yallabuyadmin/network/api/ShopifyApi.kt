@@ -1,6 +1,8 @@
 package eg.gov.iti.yallabuyadmin.network.api
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
+import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleResponse
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
@@ -86,6 +88,12 @@ interface ShopifyApi {
         @Path("id") ruleId: Long,
         @Body body: UpdatePriceRuleRequest
     ): Response<PriceRuleResponseWrapper>
+
+
+    @POST("price_rules.json")
+    suspend fun createPriceRule(
+        @Body request: CreatePriceRuleRequest
+    ): Response<CreatePriceRuleResponse>
 
 
 }

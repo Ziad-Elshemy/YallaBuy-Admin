@@ -47,6 +47,7 @@ sealed class NavigationRoute(val route: String) {
     object CreateProduct : NavigationRoute("create_product_screen")
 
     object EditPriceRule : NavigationRoute("edit_price_rule_screen")
+    object CreatePriceRule : NavigationRoute("create_price_rule_screen")
 
 }
 

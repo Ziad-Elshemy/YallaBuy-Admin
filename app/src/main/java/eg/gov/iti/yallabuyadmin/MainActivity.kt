@@ -22,6 +22,8 @@ import eg.gov.iti.yallabuyadmin.addproduct.CreateProductScreen
 import eg.gov.iti.yallabuyadmin.addproduct.CreateProductViewModel
 import eg.gov.iti.yallabuyadmin.coupons.CouponsScreen
 import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
+import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleScreen
+import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleViewModel
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardScreen
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardViewModel
 import eg.gov.iti.yallabuyadmin.editpricerule.EditPriceRuleScreen
@@ -119,6 +121,11 @@ class MainActivity : ComponentActivity() {
                                 } else {
                                     Text("No Price Rule Selected")
                                 }
+                            }
+
+                            composable(NavigationRoute.CreatePriceRule.route) {
+                                val viewModel: CreatePriceRuleViewModel = koinViewModel()
+                                CreatePriceRuleScreen(navController, viewModel)
                             }
 
 

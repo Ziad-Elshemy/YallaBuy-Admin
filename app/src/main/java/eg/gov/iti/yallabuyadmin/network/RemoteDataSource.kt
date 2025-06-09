@@ -22,9 +22,9 @@ interface RemoteDataSource {
     suspend fun getAllProductTypes(): Flow<ProductsResponse>
     suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int>
 
-    //
+    //price rules
     suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>>
-
     suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem>
+    suspend fun createPriceRule(rule: PriceRulesItem): Flow<PriceRulesItem>
 
 }

@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
@@ -120,6 +121,17 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
+
+    override suspend fun createPriceRule(rule: PriceRulesItem): Flow<PriceRulesItem> = flow {
+        val response = services.createPriceRule(CreatePriceRuleRequest(rule))
+        if (response.isSuccessful) {
+            val created = response.body()?.priceRule
+            if (created != null) emit(created)
+            else throw Exception("Empty response from API")
+        } else {
+            throw Exception("Failed to create price rule: ${response.code()} ${response.message()}")
+        }
+    }
 
 
 
