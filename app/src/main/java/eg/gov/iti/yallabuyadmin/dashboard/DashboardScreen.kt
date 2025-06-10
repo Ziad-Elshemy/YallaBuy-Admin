@@ -40,7 +40,8 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel)
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = backgroundBrush)
+//                .background(brush = backgroundBrush)
+                .background(Color(0xFFF8F9FA))
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top,

@@ -2,12 +2,15 @@ package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import eg.gov.iti.yallabuyadmin.network.RemoteDataSource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class RepositoryImpl(
     private val localDataSource: LocalDataSource,
@@ -58,6 +61,46 @@ class RepositoryImpl(
 
     override suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int> {
         return remoteDataSource.setInventory(locationId, inventoryItemId, available)
+    }
+
+    override suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>> {
+        return remoteDataSource.getAllPriceRules()
+    }
+
+    override suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem> {
+        return remoteDataSource.updatePriceRule(id, rule)
+    }
+
+    override suspend fun createPriceRule(rule: PriceRulesItem): Flow<PriceRulesItem> {
+        return remoteDataSource.createPriceRule(rule)
+    }
+
+    override suspend fun getAllDiscountCodes(): Flow<List<DiscountCode>>  = flow {
+        val rules = getAllPriceRulesSync()
+        val allDiscounts = rules
+            .filter { it.id != null }
+            .flatMap { rule ->
+                remoteDataSource.getDiscountCodesByPriceRuleId(rule.id!!)
+            }
+        emit(allDiscounts)
+    }
+
+    override suspend fun getAllPriceRulesSync(): List<PriceRulesItem> {
+        val response = remoteDataSource.getAllPriceRulesRaw()
+        if (response.isSuccessful) {
+            return response.body()?.priceRules?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch price rules: ${response.code()}")
+        }
+    }
+
+
+    override suspend fun deleteDiscountCode(
+        priceRuleId: Long,
+        discountCodeId: Long
+    ): Flow<Boolean>  = flow {
+        val result = remoteDataSource.deleteDiscountCode(priceRuleId, discountCodeId)
+        emit(result)
     }
 
     companion object {

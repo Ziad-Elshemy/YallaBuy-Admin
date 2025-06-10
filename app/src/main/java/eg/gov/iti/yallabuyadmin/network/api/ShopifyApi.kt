@@ -1,14 +1,20 @@
 package eg.gov.iti.yallabuyadmin.network.api
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
+import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleResponse
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCodesResponse
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.InventoryLevelResponse
+import eg.gov.iti.yallabuyadmin.model.PriceRuleResponseWrapper
+import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductByIdResponse
 import eg.gov.iti.yallabuyadmin.model.ProductWrapper
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
+import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -73,5 +79,34 @@ interface ShopifyApi {
     suspend fun setInventory(
         @Body body: InventorySetRequest
     ): Response<InventoryLevelResponse>
+
+
+    @GET("price_rules.json")
+    suspend fun getAllPriceRules(): Response<PriceRulesResponse>
+
+    @PUT("price_rules/{id}.json")
+    suspend fun updatePriceRule(
+        @Path("id") ruleId: Long,
+        @Body body: UpdatePriceRuleRequest
+    ): Response<PriceRuleResponseWrapper>
+
+
+    @POST("price_rules.json")
+    suspend fun createPriceRule(
+        @Body request: CreatePriceRuleRequest
+    ): Response<CreatePriceRuleResponse>
+
+    @GET("price_rules/{id}/discount_codes.json")
+    suspend fun getDiscountCodes(
+        @Path("id") priceRuleId: Long
+    ): Response<DiscountCodesResponse>
+
+
+    @DELETE("price_rules/{price_rule_id}/discount_codes/{discount_code_id}.json")
+    suspend fun deleteDiscountCode(
+        @Path("price_rule_id") priceRuleId: Long,
+        @Path("discount_code_id") discountCodeId: Long
+    ): Response<Unit>
+
 
 }
