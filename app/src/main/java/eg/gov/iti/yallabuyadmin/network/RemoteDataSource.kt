@@ -1,12 +1,15 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
+import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import kotlinx.coroutines.flow.Flow
+import retrofit2.Response
 
 interface RemoteDataSource {
 
@@ -26,5 +29,10 @@ interface RemoteDataSource {
     suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>>
     suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem>
     suspend fun createPriceRule(rule: PriceRulesItem): Flow<PriceRulesItem>
+
+    //
+    suspend fun getDiscountCodesByPriceRuleId(priceRuleId: Long): List<DiscountCode>
+    suspend fun getAllPriceRulesRaw(): Response<PriceRulesResponse>
+    suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Boolean
 
 }

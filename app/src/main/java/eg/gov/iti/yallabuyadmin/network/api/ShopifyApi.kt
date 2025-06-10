@@ -4,6 +4,7 @@ import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleResponse
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCodesResponse
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.InventoryLevelResponse
@@ -94,6 +95,18 @@ interface ShopifyApi {
     suspend fun createPriceRule(
         @Body request: CreatePriceRuleRequest
     ): Response<CreatePriceRuleResponse>
+
+    @GET("price_rules/{id}/discount_codes.json")
+    suspend fun getDiscountCodes(
+        @Path("id") priceRuleId: Long
+    ): Response<DiscountCodesResponse>
+
+
+    @DELETE("price_rules/{price_rule_id}/discount_codes/{discount_code_id}.json")
+    suspend fun deleteDiscountCode(
+        @Path("price_rule_id") priceRuleId: Long,
+        @Path("discount_code_id") discountCodeId: Long
+    ): Response<Unit>
 
 
 }

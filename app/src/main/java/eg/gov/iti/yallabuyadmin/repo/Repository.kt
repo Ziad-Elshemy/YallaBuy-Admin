@@ -1,6 +1,7 @@
 package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
@@ -26,5 +27,10 @@ interface Repository {
     suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>>
     suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem>
     suspend fun createPriceRule(rule: PriceRulesItem): Flow<PriceRulesItem>
+
+    //
+    suspend fun getAllDiscountCodes(): Flow<List<DiscountCode>>
+    suspend fun getAllPriceRulesSync(): List<PriceRulesItem>
+    suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Flow<Boolean>
 
 }

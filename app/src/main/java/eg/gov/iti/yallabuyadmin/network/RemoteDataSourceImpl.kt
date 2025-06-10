@@ -3,6 +3,7 @@ package eg.gov.iti.yallabuyadmin.network
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
@@ -133,11 +134,21 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
+    override suspend fun getDiscountCodesByPriceRuleId(priceRuleId: Long): List<DiscountCode> {
+        val response = services.getDiscountCodes(priceRuleId)
+        if (response.isSuccessful) {
+            return response.body()?.discountCodes ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch discount codes for rule $priceRuleId")
+        }
+    }
 
+    override suspend fun getAllPriceRulesRaw(): Response<PriceRulesResponse> {
+        return services.getAllPriceRules()
+    }
 
-
-
-
-
-
+    override suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Boolean {
+        val response = services.deleteDiscountCode(priceRuleId, discountCodeId)
+        return response.isSuccessful
+    }
 }
