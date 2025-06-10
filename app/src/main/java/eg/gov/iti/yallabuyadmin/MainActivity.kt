@@ -9,6 +9,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -55,11 +57,13 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val navController = rememberNavController()
+            val snackBarHostState = remember { SnackbarHostState() }
 
             YallaBuyAdminTheme {
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize(),
+                    snackbarHost = { SnackbarHost(snackBarHostState) },
                     bottomBar = { BottomNavigationBar(navController) }
                 ) { innerPadding ->
 
@@ -68,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
                             composable(route = NavigationRoute.Products.route) {
                                 val productsViewModel : ProductsViewModel = koinViewModel()
-                                ProductsScreen(navController, productsViewModel)
+                                ProductsScreen(navController, productsViewModel,snackBarHostState)
                             }
                             composable(route = NavigationRoute.Inventory.route) {
                                 val inventoryViewModel : InventoryViewModel = koinViewModel()
@@ -80,7 +84,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(route = NavigationRoute.Coupons.route) {
                                 val couponsViewModel : CouponsViewModel = koinViewModel()
-                                CouponsScreen(navController, couponsViewModel)
+                                CouponsScreen(navController, couponsViewModel,snackBarHostState)
                             }
                             composable(route = NavigationRoute.Profile.route) {
                                 val profileViewModel : ProfileViewModel = koinViewModel()

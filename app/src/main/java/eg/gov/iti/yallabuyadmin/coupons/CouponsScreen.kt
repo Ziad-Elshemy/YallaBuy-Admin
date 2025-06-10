@@ -59,14 +59,16 @@ import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 
 
 @Composable
-fun CouponsScreen(navController: NavController, viewModel: CouponsViewModel) {
+fun CouponsScreen(navController: NavController,
+                  viewModel: CouponsViewModel,
+                  snackBarHostState: SnackbarHostState) {
     val uiState by viewModel.priceRules.collectAsState()
     val uiState2 by viewModel.discountCodes.collectAsState()
-    val snackBarHostState = remember { SnackbarHostState() }
+
     val currentTab = remember { mutableStateOf("rules") } // "rules" or "discounts"
 
     val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(Color(0xFF2CABAB), Color(0xFFE1F5FE))
+        colors = listOf(Color(0xFF009688), Color(0xFFE1F5FE))
     )
 
     LaunchedEffect(Unit) {
@@ -87,18 +89,19 @@ fun CouponsScreen(navController: NavController, viewModel: CouponsViewModel) {
     }
 
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackBarHostState) }
-    ) { paddingValues ->
+//    Scaffold(
+//        modifier = Modifier.fillMaxSize(),
+//        snackbarHost = { SnackbarHost(snackBarHostState) }
+//    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = backgroundBrush)
-                .padding(paddingValues)
+//                .background(brush = backgroundBrush)
+                .background(Color(0xFFF8F9FA))
+//                .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Header Row with Add Button
+            // Header Row with Add and Search Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -194,7 +197,7 @@ fun CouponsScreen(navController: NavController, viewModel: CouponsViewModel) {
             }
 
         }
-    }
+//    }
 }
 
 @Composable
@@ -203,7 +206,7 @@ fun TabButton(text: String, selected: Boolean, modifier: Modifier = Modifier, on
         onClick = onClick,
         modifier = modifier
             .height(48.dp)
-            .background(if (selected) Color(0xFF2CABAB) else Color.Transparent)
+            .background(if (selected) Color(0xFF009688) else Color.Transparent)
     ) {
         Text(
             text = text,

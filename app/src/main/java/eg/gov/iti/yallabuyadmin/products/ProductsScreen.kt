@@ -73,111 +73,103 @@ import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductsScreen(navController: NavController, viewModel: ProductsViewModel) {
+fun ProductsScreen(
+    navController: NavController,
+    viewModel: ProductsViewModel,
+    snackBarHostState: SnackbarHostState
+) {
 
 
     viewModel.fetchProductsItems()
 
     val uiState by viewModel.allProducts.collectAsStateWithLifecycle()
 
-    val snackBarHostState = remember { SnackbarHostState() }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-    val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF2CABAB),
-            Color(0xFFE1F5FE)
-        )
-    )
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackBarHostState) },
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .statusBarsPadding(),
-                title = { Text("Products", fontSize = 20.sp) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = Color.Black,
-                    actionIconContentColor = Color.Black
-                ),
-                actions = {
-                    IconButton(onClick = {  }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-
-                    IconButton(onClick = { navController.navigate(NavigationRoute.CreateProduct.route) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Product")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-//                .background(brush = backgroundBrush)
-                .background(Color.White)
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+        // Header Row with Add and Search Buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-
-            when (uiState) {
-                is Response.Loading -> {
-                    LoadingIndicator()
+            Text(
+                "Products",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Row {
+                IconButton(onClick = { /* Search Click */ }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
                 }
-
-                is Response.Success -> {
-                    ProductsScreenUI(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        navController = navController,
-                        viewModel,
-                        (uiState as Response.Success<List<ProductsItem?>?>).data
-                    )
-                }
-
-                is Response.Failure -> {
-                    Text(
-                        text = "Failed to fetch data",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .wrapContentSize(),
-                        fontSize = 22.sp
-                    )
-                }
-
-
-            }
-
-            LaunchedEffect(key1 = viewModel.toastMessage) {
-                viewModel.toastMessage.collect{message->
-                    if (!message.isNullOrBlank()){
-                        snackBarHostState.showSnackbar(
-                            message = message,
-                            duration = SnackbarDuration.Short
-                        )
-                    }
+                IconButton(onClick = {
+                    navController.navigate(NavigationRoute.CreateProduct.route)
+                }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             }
 
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        when (uiState) {
+            is Response.Loading -> {
+                LoadingIndicator()
+            }
+
+            is Response.Success -> {
+                ProductsScreenUI(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    navController = navController,
+                    viewModel,
+                    (uiState as Response.Success<List<ProductsItem?>?>).data
+                )
+            }
+
+            is Response.Failure -> {
+                Text(
+                    text = "Failed to fetch data",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(),
+                    fontSize = 22.sp
+                )
+            }
+
+
+        }
+
+        LaunchedEffect(key1 = viewModel.toastMessage) {
+            viewModel.toastMessage.collect { message ->
+                if (!message.isNullOrBlank()) {
+                    snackBarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+
     }
+//    }
 }
 
 
 @Composable
-fun ProductsScreenUI(modifier: Modifier = Modifier,
-                     navController: NavController,
-                     viewModel: ProductsViewModel,
-                     products: List<ProductsItem?>?) {
+fun ProductsScreenUI(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: ProductsViewModel,
+    products: List<ProductsItem?>?
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -187,7 +179,7 @@ fun ProductsScreenUI(modifier: Modifier = Modifier,
             products = products,
             navController = navController,
             onDeleteProduct = { product ->
-                 viewModel.deleteProductById(product?.id ?: 0)
+                viewModel.deleteProductById(product?.id ?: 0)
                 // add snack bar
             }
         )
@@ -227,12 +219,12 @@ fun ProductItem(
     val quantity = product?.variants?.firstOrNull()?.inventoryQuantity ?: 0
 
 
-    Box (modifier = Modifier.padding(4.dp)){
-        Log.e("ProductItem", "ProductItem: id = ${product?.id}", )
+    Box(modifier = Modifier.padding(4.dp)) {
+        Log.e("ProductItem", "ProductItem: id = ${product?.id}")
         Card(
             modifier = Modifier
                 .clickable {
-                    Log.e("ProductItem", "ProductItem: clickable id = ${product?.id}", )
+                    Log.e("ProductItem", "ProductItem: clickable id = ${product?.id}")
                     navController.navigate(
                         NavigationRoute.ProductDetails.createRoute(
                             product?.id ?: 11916346917182
@@ -242,10 +234,12 @@ fun ProductItem(
                 .width(220.dp)
                 .height(240.dp)
                 .padding(4.dp),
-            colors = CardColors(containerColor = Color.White,
+            colors = CardColors(
+                containerColor = Color.White,
                 contentColor = Color.Black,
                 disabledContentColor = Color.White,
-                disabledContainerColor = Color.White),
+                disabledContainerColor = Color.White
+            ),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(

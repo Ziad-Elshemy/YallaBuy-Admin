@@ -1,9 +1,12 @@
 package eg.gov.iti.yallabuyadmin.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -23,11 +26,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 
 import eg.gov.iti.yallabuyadmin.R
 
@@ -77,7 +82,7 @@ fun BottomNavigationBar(navController: NavController) {
 
     if (shouldShowBottomNav){
         Box {
-            NavigationBar(containerColor = Color(0xFFB0BEC5)) {
+            NavigationBar(containerColor = Color.White) {
                 navigationItems.forEachIndexed { index, item ->
                     if (index == middleIndex) {
                         Spacer(Modifier.weight(1f)) // horizontal space for the floating btn
@@ -96,26 +101,36 @@ fun BottomNavigationBar(navController: NavController) {
                                 }
                             },
                             icon = {
-                                Icon(
-                                    painter = item.icon,
-                                    contentDescription = item.title,
-                                    tint = if (index == selectedNavigationIndex)
-                                        Color(0xFF2CABAB)
-                                    else
-                                        Color(0xFF4F585D)
-                                )
+                                Column(
+                                    modifier = Modifier
+//                                        .background(
+//                                            color = if (selectedNavigationIndex == index) Color(0xFF2CABAB) else Color.Transparent,
+//                                            shape = RoundedCornerShape(30)
+//                                        )
+                                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        painter = item.icon,
+                                        contentDescription = item.title,
+                                        tint = if (selectedNavigationIndex == index)
+                                            Color.Black
+                                        else
+                                            Color(0xFF4F585D)
+                                    )
+                                }
                             },
                             label = {
                                 Text(
                                     item.title,
                                     color = if (index == selectedNavigationIndex)
-                                        Color(0xFF2CABAB)
+                                        Color(0xFF1B1B1E)
                                     else
                                         Color(0xFF4F585D)
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Color(0xFFB0BEC5)
+                                indicatorColor = Color(0xFF009688)
                             )
                         )
                     }
@@ -145,7 +160,7 @@ fun BottomNavigationBar(navController: NavController) {
                 Icon(
                     painter = navigationItems[middleIndex].icon,
                     contentDescription = "Dashboard",
-                    tint = if (isSelected) Color(0xFF2CABAB) else Color(0xFF4F585D)
+                    tint = if (isSelected) Color(0xFF009688) else Color(0xFF424554)
                 )
             }
 
