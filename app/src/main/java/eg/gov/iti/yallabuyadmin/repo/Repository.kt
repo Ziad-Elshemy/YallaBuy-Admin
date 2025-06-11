@@ -27,10 +27,13 @@ interface Repository {
     suspend fun getAllPriceRules(): Flow<List<PriceRulesItem>>
     suspend fun updatePriceRule(id: Long, rule: PriceRulesItem): Flow<PriceRulesItem>
     suspend fun createPriceRule(rule: PriceRulesItem): Flow<PriceRulesItem>
+    suspend fun deletePriceRule(priceRuleId: Long): Flow<Boolean>
 
     //
     suspend fun getAllDiscountCodes(): Flow<List<DiscountCode>>
     suspend fun getAllPriceRulesSync(): List<PriceRulesItem>
     suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Flow<Boolean>
+    suspend fun updateDiscountCode(priceRuleId: Long, discountCodeId: Long, discountCode: DiscountCode): Flow<DiscountCode>
+    suspend fun createDiscountCode(ruleId: Long, discountCode: DiscountCode): Flow<DiscountCode>
 
 }

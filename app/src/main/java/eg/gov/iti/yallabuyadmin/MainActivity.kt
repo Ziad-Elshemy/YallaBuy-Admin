@@ -24,6 +24,8 @@ import eg.gov.iti.yallabuyadmin.addproduct.CreateProductScreen
 import eg.gov.iti.yallabuyadmin.addproduct.CreateProductViewModel
 import eg.gov.iti.yallabuyadmin.coupons.CouponsScreen
 import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
+import eg.gov.iti.yallabuyadmin.creatediscount.CreateDiscountScreen
+import eg.gov.iti.yallabuyadmin.creatediscount.CreateDiscountViewModel
 import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleScreen
 import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleViewModel
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardScreen
@@ -130,6 +132,11 @@ class MainActivity : ComponentActivity() {
                             composable(NavigationRoute.CreatePriceRule.route) {
                                 val viewModel: CreatePriceRuleViewModel = koinViewModel()
                                 CreatePriceRuleScreen(navController, viewModel)
+                            }
+
+                            composable(NavigationRoute.CreateDiscount.route) {
+                                val viewModel: CreateDiscountViewModel = koinViewModel()
+                                CreateDiscountScreen(navController, viewModel)
                             }
 
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
+import eg.gov.iti.yallabuyadmin.model.DiscountCodeRequest
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.iti.mad.climaguard.repo.Repository
@@ -25,9 +26,11 @@ class CouponsViewModel(private val repo: Repository) : ViewModel() {
     private val _discountCodes = MutableStateFlow<Response<List<DiscountCode>>>(Response.Loading)
     val discountCodes = _discountCodes.asStateFlow()
 
-
     private val _deleteResult = MutableSharedFlow<String>()
     val deleteResult = _deleteResult.asSharedFlow()
+
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage = _toastMessage.asSharedFlow()
 
     fun fetchPriceRules() {
         viewModelScope.launch {
@@ -54,6 +57,21 @@ class CouponsViewModel(private val repo: Repository) : ViewModel() {
         }
     }
 
+    fun deletePriceRule(priceRuleId: Long) {
+        viewModelScope.launch {
+            repo.deletePriceRule(priceRuleId)
+                .catch { _deleteResult.emit("Failed to delete: ${it.message}") }
+                .collect { success ->
+                    if (success) {
+                        _deleteResult.emit("Rule deleted successfully")
+                        fetchPriceRules()
+                    } else {
+                        _deleteResult.emit("Deletion failed")
+                    }
+                }
+        }
+    }
+
 
     fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long) {
         viewModelScope.launch {
@@ -67,6 +85,32 @@ class CouponsViewModel(private val repo: Repository) : ViewModel() {
                         _deleteResult.emit("Deletion failed")
                     }
                 }
+        }
+    }
+
+    fun updateDiscountCode(priceRuleId: Long, discountId: Long, newCode: String) {
+        viewModelScope.launch {
+            try {
+                repo.updateDiscountCode(
+                    priceRuleId,
+                    discountId,
+                    DiscountCode(
+                        id = discountId,
+                        priceRuleId = priceRuleId,
+                        code = newCode
+                    )
+                )
+                    .catch { e ->
+                        _toastMessage.emit("Update failed: ${e.message}")
+                    }
+                    .collect{ discount ->
+                        _toastMessage.emit("Discount ${discount.code} updated")
+                        fetchDiscountCodes()
+                    }
+
+            } catch (e: Exception) {
+                _toastMessage.emit("Update failed: ${e.message}")
+            }
         }
     }
 

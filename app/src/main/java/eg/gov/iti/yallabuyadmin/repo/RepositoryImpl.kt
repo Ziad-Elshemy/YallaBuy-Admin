@@ -75,6 +75,11 @@ class RepositoryImpl(
         return remoteDataSource.createPriceRule(rule)
     }
 
+    override suspend fun deletePriceRule(priceRuleId: Long): Flow<Boolean>  = flow {
+        val result = remoteDataSource.deletePriceRule(priceRuleId)
+        emit(result)
+    }
+
     override suspend fun getAllDiscountCodes(): Flow<List<DiscountCode>>  = flow {
         val rules = getAllPriceRulesSync()
         val allDiscounts = rules
@@ -101,6 +106,21 @@ class RepositoryImpl(
     ): Flow<Boolean>  = flow {
         val result = remoteDataSource.deleteDiscountCode(priceRuleId, discountCodeId)
         emit(result)
+    }
+
+    override suspend fun updateDiscountCode(
+        priceRuleId: Long,
+        discountCodeId: Long,
+        discountCode: DiscountCode
+    ): Flow<DiscountCode> {
+        return remoteDataSource.updateDiscountCode(priceRuleId, discountCodeId, discountCode)
+    }
+
+    override suspend fun createDiscountCode(
+        ruleId: Long,
+        discountCode: DiscountCode
+    ): Flow<DiscountCode> {
+        return remoteDataSource.createDiscountCode(ruleId,discountCode)
     }
 
     companion object {

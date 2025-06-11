@@ -3,6 +3,7 @@ package eg.gov.iti.yallabuyadmin.di
 import eg.gov.iti.yallabuyadmin.BuildConfig
 import eg.gov.iti.yallabuyadmin.addproduct.CreateProductViewModel
 import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
+import eg.gov.iti.yallabuyadmin.creatediscount.CreateDiscountViewModel
 import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleViewModel
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardViewModel
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
@@ -125,6 +126,10 @@ val viewModelsModule = module {
 
     viewModel <CreatePriceRuleViewModel> {
         CreatePriceRuleViewModel(get())
+    }
+
+    viewModel <CreateDiscountViewModel> {
+        CreateDiscountViewModel(get())
     }
 
 }
