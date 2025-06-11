@@ -53,6 +53,7 @@ sealed class NavigationRoute(val route: String) {
 
     object EditPriceRule : NavigationRoute("edit_price_rule_screen")
     object CreatePriceRule : NavigationRoute("create_price_rule_screen")
+    object CreateDiscount : NavigationRoute("create_discount_screen")
 
 }
 
@@ -75,9 +76,15 @@ fun BottomNavigationBar(navController: NavController) {
 
 
     val shouldShowBottomNav =
-        (currentDestination?.destination?.route != NavigationRoute.Login.route &&
-                currentDestination?.destination?.route != NavigationRoute.ProductDetails.route &&
-                currentDestination?.destination?.route != NavigationRoute.CreateProduct.route)
+        (
+            currentDestination?.destination?.route != NavigationRoute.Login.route &&
+            currentDestination?.destination?.route != NavigationRoute.ProductDetails.route &&
+            currentDestination?.destination?.route != NavigationRoute.CreateProduct.route &&
+            currentDestination?.destination?.route != NavigationRoute.CreatePriceRule.route &&
+            currentDestination?.destination?.route != NavigationRoute.CreateDiscount.route &&
+            currentDestination?.destination?.route != NavigationRoute.EditPriceRule.route
+
+        )
 
 
     if (shouldShowBottomNav){

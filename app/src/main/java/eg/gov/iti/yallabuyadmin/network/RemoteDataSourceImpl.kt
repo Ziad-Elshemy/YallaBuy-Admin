@@ -4,6 +4,7 @@ import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
+import eg.gov.iti.yallabuyadmin.model.DiscountCodeRequest
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
@@ -134,6 +135,11 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
+    override suspend fun deletePriceRule(priceRuleId: Long): Boolean {
+        val response = services.deletePriceRule(priceRuleId)
+        return response.isSuccessful
+    }
+
     override suspend fun getDiscountCodesByPriceRuleId(priceRuleId: Long): List<DiscountCode> {
         val response = services.getDiscountCodes(priceRuleId)
         if (response.isSuccessful) {
@@ -150,5 +156,29 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
     override suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Boolean {
         val response = services.deleteDiscountCode(priceRuleId, discountCodeId)
         return response.isSuccessful
+    }
+
+    override suspend fun updateDiscountCode(
+        priceRuleId: Long,
+        discountCodeId: Long,
+        discountCode: DiscountCode
+    ): Flow<DiscountCode> = flow {
+        val response = services.updateDiscountCode(priceRuleId,discountCodeId,
+            DiscountCodeRequest(discountCode))
+        if (response.isSuccessful) {
+            val newDiscountCode = response.body()?.discountCode
+            if (newDiscountCode != null) emit(newDiscountCode)
+            else throw Exception("Empty response from API")
+        }
+    }
+
+    override suspend fun createDiscountCode(ruleId: Long, discountCode: DiscountCode): Flow<DiscountCode> = flow {
+        val response = services.createDiscountCode(ruleId, DiscountCodeRequest(discountCode))
+        if (response.isSuccessful){
+            val newDiscountCode = response.body()?.discountCode
+            if (newDiscountCode != null) emit(newDiscountCode)
+        }else{
+            throw Exception("Empty response from API")
+        }
     }
 }

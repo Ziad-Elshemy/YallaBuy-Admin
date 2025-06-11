@@ -1,8 +1,10 @@
 package eg.gov.iti.yallabuyadmin.coupons
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -87,6 +90,11 @@ fun CouponsScreen(navController: NavController,
             snackBarHostState.showSnackbar(message)
         }
     }
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collect { message ->
+            snackBarHostState.showSnackbar(message)
+        }
+    }
 
 
 //    Scaffold(
@@ -119,7 +127,7 @@ fun CouponsScreen(navController: NavController,
                         if (currentTab.value == "rules") {
                             navController.navigate(NavigationRoute.CreatePriceRule.route)
                         } else {
-                            // navController.navigate(NavigationRoute.CreateDiscount.route)
+                             navController.navigate(NavigationRoute.CreateDiscount.route)
                         }
                     }) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
@@ -169,10 +177,15 @@ fun CouponsScreen(navController: NavController,
                             if (currentTab.value == "rules") {
                                 PriceRulesScreen(
                                     rules = rules,
-                                    navController = navController
+                                    navController = navController,
+                                    onEditClick = { rule ->
+                                        navController.currentBackStackEntry?.savedStateHandle?.set("selected_rule", rule)
+                                        navController.navigate(NavigationRoute.EditPriceRule.route)
+                                    }
                                 ) { rule ->
-                                    navController.currentBackStackEntry?.savedStateHandle?.set("selected_rule", rule)
-                                    navController.navigate(NavigationRoute.EditPriceRule.route)
+                                    Log.e("CouponsScreen", "Rule deleted: ${rule.title}", )
+                                    val priceRuleId = rule.id ?: return@PriceRulesScreen
+                                    viewModel.deletePriceRule(priceRuleId)
                                 }
                             } else {
                                 Text("Discounts will be shown here")
@@ -185,7 +198,14 @@ fun CouponsScreen(navController: NavController,
                         is Response.Loading -> LoadingIndicator()
                         is Response.Success -> {
                             val discounts = (uiState2 as Response.Success<List<DiscountCode>>).data
-                            DiscountsScreen(discounts){ discount ->
+                            DiscountsScreen(
+                                discounts = discounts,
+                                onEditClick = { discount,newCode ->
+                                    val priceRuleId = discount.priceRuleId ?: return@DiscountsScreen
+                                    val discountId = discount.id ?: return@DiscountsScreen
+                                    viewModel.updateDiscountCode(priceRuleId, discountId, newCode)
+                                }
+                            ){ discount ->
                                 val priceRuleId = discount.priceRuleId ?: return@DiscountsScreen
                                 val discountId = discount.id ?: return@DiscountsScreen
                                 viewModel.deleteDiscountCode(priceRuleId, discountId)
@@ -224,31 +244,19 @@ fun TabButton(text: String, selected: Boolean, modifier: Modifier = Modifier, on
 fun PriceRulesScreen(
     rules: List<PriceRulesItem>,
     navController: NavController,
-    onEditClick: (PriceRulesItem) -> Unit
+    onEditClick: (PriceRulesItem) -> Unit,
+    onDeleteClick: (PriceRulesItem) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text("Price Rules", style = MaterialTheme.typography.titleLarge)
-//            Row {
-//                IconButton(onClick = { /* Search Click */ }) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search")
-//                }
-//                IconButton(onClick = {
-//                    navController.navigate(NavigationRoute.CreatePriceRule.route)
-//                }) {
-//                    Icon(Icons.Default.Add, contentDescription = "Add")
-//                }
-//            }
-//        }
-//
-//        Spacer(Modifier.height(8.dp))
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
 
         LazyColumn {
             items(rules) { rule ->
-                PriceRuleItemCard(rule, onEditClick)
+                PriceRuleItemCard(
+                    rule = rule,
+                    onEditClick = onEditClick,
+                    onDelete = { onDeleteClick(rule) })
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -258,12 +266,39 @@ fun PriceRulesScreen(
 @Composable
 fun PriceRuleItemCard(
     rule: PriceRulesItem,
-    onEditClick: (PriceRulesItem) -> Unit
+    onEditClick: (PriceRulesItem) -> Unit,
+    onDelete: () -> Unit
 ) {
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Delete Price Rule") },
+            text = { Text("Are you sure you want to delete the rule: ${rule.title}?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    onDelete()
+                }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEditClick(rule) }
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -285,8 +320,8 @@ fun PriceRuleItemCard(
                 Text("Expiry Date: ${rule.endsAt ?: "None"}")
             }
 
-            IconButton(onClick = { onEditClick(rule) }) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit")
+            IconButton(onClick = { showDialog = true}) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete Rule", tint = Color.Red)
             }
         }
     }
@@ -296,12 +331,16 @@ fun PriceRuleItemCard(
 @Composable
 fun DiscountsScreen(
     discounts: List<DiscountCode>,
+    onEditClick: (DiscountCode,String) -> Unit,
     onDeleteClick: (DiscountCode) -> Unit
 ) {
     LazyColumn {
         items(discounts) { discount ->
             DiscountItemCard(
                 discount = discount,
+                onEditClick = { newCode->
+                    onEditClick(discount,newCode)
+                              },
                 onDelete = { onDeleteClick(discount) }
             )
         }
@@ -311,9 +350,11 @@ fun DiscountsScreen(
 @Composable
 fun DiscountItemCard(
     discount: DiscountCode,
+    onEditClick: (String) -> Unit,
     onDelete: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
         AlertDialog(
@@ -336,10 +377,23 @@ fun DiscountItemCard(
         )
     }
 
+
+    if (showEditDialog) {
+        EditDiscountDialog(
+            currentCode = discount.code ?: "",
+            onDismiss = { showEditDialog = false },
+            onConfirm = { newCode ->
+                onEditClick(newCode)
+                showEditDialog = false
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { showEditDialog = true },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -360,6 +414,42 @@ fun DiscountItemCard(
         }
     }
 }
+
+
+@Composable
+fun EditDiscountDialog(
+    currentCode: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var updatedCode by remember { mutableStateOf(currentCode) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Discount Code") },
+        text = {
+            OutlinedTextField(
+                value = updatedCode,
+                onValueChange = { updatedCode = it },
+                label = { Text("Discount Code") },
+                singleLine = true
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(
+                updatedCode
+            ) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
 
 
 

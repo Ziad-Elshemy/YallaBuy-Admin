@@ -4,6 +4,8 @@ import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleResponse
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCodeRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCodeResponse
 import eg.gov.iti.yallabuyadmin.model.DiscountCodesResponse
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
@@ -96,6 +98,11 @@ interface ShopifyApi {
         @Body request: CreatePriceRuleRequest
     ): Response<CreatePriceRuleResponse>
 
+    @DELETE("price_rules/{price_rule_id}.json")
+    suspend fun deletePriceRule(
+        @Path("price_rule_id") priceRuleId: Long,
+    ): Response<Unit>
+
     @GET("price_rules/{id}/discount_codes.json")
     suspend fun getDiscountCodes(
         @Path("id") priceRuleId: Long
@@ -107,6 +114,20 @@ interface ShopifyApi {
         @Path("price_rule_id") priceRuleId: Long,
         @Path("discount_code_id") discountCodeId: Long
     ): Response<Unit>
+
+    @PUT("price_rules/{rule_id}/discount_codes/{discount_id}.json")
+    suspend fun updateDiscountCode(
+        @Path("rule_id") ruleId: Long,
+        @Path("discount_id") discountId: Long,
+        @Body body: DiscountCodeRequest
+    ): Response<DiscountCodeRequest>
+
+
+    @POST("price_rules/{rule_id}/discount_codes.json")
+    suspend fun createDiscountCode(
+        @Path("rule_id") ruleId: Long,
+        @Body body: DiscountCodeRequest
+    ): Response<DiscountCodeResponse>
 
 
 }
