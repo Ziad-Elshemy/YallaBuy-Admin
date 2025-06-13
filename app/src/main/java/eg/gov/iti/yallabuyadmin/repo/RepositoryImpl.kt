@@ -4,6 +4,7 @@ import eg.gov.iti.yallabuyadmin.database.LocalDataSource
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
@@ -122,6 +123,31 @@ class RepositoryImpl(
     ): Flow<DiscountCode> {
         return remoteDataSource.createDiscountCode(ruleId,discountCode)
     }
+
+
+    override suspend fun getInventoryItems(): Flow<List<InventoryItemUiModel>> = flow {
+        val variants = remoteDataSource.getAllVariants()
+        val products = remoteDataSource.getAllProductsForVariants()
+
+        val productMap = products.associateBy { it.id }
+
+        val inventoryItems = variants.mapNotNull { variant ->
+            val product = productMap[variant.productId]
+            product?.let {
+                InventoryItemUiModel(
+                    title = it.title ?: "",
+                    imageUrl = it.image?.src,
+                    variantTitle = variant.title ?: "",
+                    inventoryItemId = variant.inventoryItemId ?: 0L,
+                    quantity = variant.inventoryQuantity ?: 0,
+                    price = variant.price ?: "0.0"
+                )
+            }
+        }
+
+        emit(inventoryItems)
+    }
+
 
     companion object {
         private var INSTANCE: RepositoryImpl? = null

@@ -13,6 +13,7 @@ import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.VariantsItem
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -181,4 +182,25 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
             throw Exception("Empty response from API")
         }
     }
+
+
+    override suspend fun getAllVariants(): List<VariantsItem> {
+        val response = services.getAllVariants()
+        if (response.isSuccessful) {
+            return response.body()?.variants?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch variants: ${response.code()}")
+        }
+    }
+
+    override suspend fun getAllProductsForVariants(): List<ProductsItem> {
+        val response = services.getAllProducts()
+        if (response.isSuccessful) {
+            return response.body()?.products?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch products: ${response.code()}")
+        }
+    }
+
+
 }

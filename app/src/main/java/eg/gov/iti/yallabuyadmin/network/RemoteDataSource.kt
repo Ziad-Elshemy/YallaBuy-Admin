@@ -8,6 +8,7 @@ import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.VariantsItem
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
@@ -37,6 +38,11 @@ interface RemoteDataSource {
     suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Boolean
     suspend fun updateDiscountCode(priceRuleId: Long, discountCodeId: Long, discountCode: DiscountCode): Flow<DiscountCode>
     suspend fun createDiscountCode(ruleId: Long, discountCode: DiscountCode): Flow<DiscountCode>
+
+
+    suspend fun getAllVariants(): List<VariantsItem>
+    suspend fun getAllProductsForVariants(): List<ProductsItem>
+
 
 
 }

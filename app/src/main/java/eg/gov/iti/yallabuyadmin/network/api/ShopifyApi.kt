@@ -18,6 +18,7 @@ import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.VariantsResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -128,6 +129,15 @@ interface ShopifyApi {
         @Path("rule_id") ruleId: Long,
         @Body body: DiscountCodeRequest
     ): Response<DiscountCodeResponse>
+
+
+
+    @GET("variants.json")
+    suspend fun getAllVariants(): Response<VariantsResponse>
+
+    @GET("products.json")
+    suspend fun getAllProducts(): Response<ProductsResponse>
+
 
 
 }
