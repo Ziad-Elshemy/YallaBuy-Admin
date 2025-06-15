@@ -70,7 +70,7 @@ interface ShopifyApi {
     @POST("products.json")
     suspend fun createProduct(
         @Body request: CreateProductRequest
-    ): Response<ProductsItem>
+    ): Response<ProductWrapper>
 
     @GET("products.json?fields=vendor")
     suspend fun getVendors(): ProductsResponse
@@ -137,6 +137,15 @@ interface ShopifyApi {
 
     @GET("products.json")
     suspend fun getAllProducts(): Response<ProductsResponse>
+
+    @GET("products.json?limit=250")
+    suspend fun getAllProductsWithVariants(): Response<ProductsResponse>
+
+
+    @POST("collects.json")
+    suspend fun assignToCollection(
+        @Body body: Map<String, @JvmSuppressWildcards Any>
+    ): Response<Unit>
 
 
 

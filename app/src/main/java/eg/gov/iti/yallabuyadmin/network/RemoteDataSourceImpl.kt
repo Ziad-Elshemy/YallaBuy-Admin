@@ -95,10 +95,10 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
-    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem> = flow{
+    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?> = flow{
         val response = services.createProduct(CreateProductRequest(product))
         if (response.isSuccessful){
-            response.body()?.let { emit(it) }
+            response.body()?.let { emit(it.product) }
         } else {
             throw Exception("Create product failed with code ${response.code()}")
         }
@@ -202,5 +202,28 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
+    override suspend fun getAllProductsWithVariants(): List<ProductsItem> {
+        val response = services.getAllProductsWithVariants()
+        if (response.isSuccessful) {
+            return response.body()?.products?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch products with variants: ${response.code()}")
+        }
+    }
 
+
+    override suspend fun assignProductToCollection(
+        productId: Long,
+        collectionId: Long
+    ): Flow<Unit>  = flow {
+        val body = mapOf(
+            "collect" to mapOf(
+                "product_id" to productId,
+                "collection_id" to collectionId
+            )
+        )
+        val response = services.assignToCollection(body)
+        if (response.isSuccessful) emit(Unit)
+        else throw Exception("Failed to assign to collection: ${response.code()}")
+    }
 }

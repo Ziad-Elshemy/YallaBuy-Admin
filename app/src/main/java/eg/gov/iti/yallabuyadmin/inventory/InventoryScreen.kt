@@ -1,6 +1,8 @@
 package eg.gov.iti.yallabuyadmin.inventory
 
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,13 +13,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,8 +48,10 @@ import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 
 
 @Composable
-fun InventoryScreen(navController: NavController,
-                    viewModel: InventoryViewModel) {
+fun InventoryScreen(
+    navController: NavController,
+    viewModel: InventoryViewModel
+) {
     val uiState by viewModel.inventoryItems.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -47,7 +65,11 @@ fun InventoryScreen(navController: NavController,
             val items = (uiState as Response.Success<List<InventoryItemUiModel>>).data
             LazyColumn {
                 items(items) { item ->
-                    InventoryItemCard(item)
+                    InventoryItemCard(
+                        item = item,
+                        onUpdateQuantity = { newQuantity ->
+                            viewModel.updateVariantQuantity(item.inventoryItemId, newQuantity)
+                        })
                 }
             }
         }
@@ -55,34 +77,102 @@ fun InventoryScreen(navController: NavController,
 }
 
 @Composable
-fun InventoryItemCard(item: InventoryItemUiModel) {
+fun InventoryItemCard(
+    item: InventoryItemUiModel,
+    onUpdateQuantity: (Int) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { showDialog = true }, // open popup
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
+        // Layout here (title, quantity, etc.)
         Row(modifier = Modifier.padding(16.dp)) {
-            AsyncImage(
-                model = item.imageUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(Modifier.width(12.dp))
+            item.imageUrl?.let { image ->
+                AsyncImage(
+                    model = image,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+            }
 
             Column {
                 Text(item.title, fontWeight = FontWeight.Bold)
                 Text(item.variantTitle)
-                Text("Item Id: ${item.inventoryItemId}")
-                Text("Price: ${item.price}")
+                Text("Item ID: ${item.inventoryItemId}")
                 Text("Quantity: ${item.quantity}")
             }
         }
     }
+
+    if (showDialog) {
+        QuantityUpdateDialog(
+            productName = item.title,
+            initialQuantity = item.quantity,
+            onDismiss = { showDialog = false },
+            onConfirm = { newQty ->
+                showDialog = false
+                onUpdateQuantity(newQty)
+            }
+        )
+    }
+}
+
+
+@Composable
+fun QuantityUpdateDialog(
+    productName: String,
+    initialQuantity: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var quantity by remember { mutableStateOf(initialQuantity) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = { onConfirm(quantity) }) {
+                Text("Save Changes")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+            ) {
+                Text("Cancel")
+            }
+        },
+        title = { Text(text = productName) },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    IconButton(onClick = { if (quantity > 0) quantity-- }) {
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Decrease")
+                    }
+                    Text(
+                        text = quantity.toString(),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    IconButton(onClick = { quantity++ }) {
+                        Icon(Icons.Default.Add, contentDescription = "Increase")
+                    }
+                }
+                Text("Original: $initialQuantity", style = MaterialTheme.typography.bodyMedium)
+            }
+        },
+        shape = RoundedCornerShape(16.dp)
+    )
 }
 
 

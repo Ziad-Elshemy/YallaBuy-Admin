@@ -48,7 +48,7 @@ class RepositoryImpl(
         return remoteDataSource.deleteProductImage(productId,imageId)
     }
 
-    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem> {
+    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?> {
         return remoteDataSource.createProduct(product)
     }
 
@@ -126,28 +126,31 @@ class RepositoryImpl(
 
 
     override suspend fun getInventoryItems(): Flow<List<InventoryItemUiModel>> = flow {
-        val variants = remoteDataSource.getAllVariants()
-        val products = remoteDataSource.getAllProductsForVariants()
+        val products = remoteDataSource.getAllProductsWithVariants()
 
-        val productMap = products.associateBy { it.id }
-
-        val inventoryItems = variants.mapNotNull { variant ->
-            val product = productMap[variant.productId]
-            product?.let {
+        val inventoryItems = products.flatMap { product ->
+            product.variants?.mapNotNull { variant ->
                 InventoryItemUiModel(
-                    title = it.title ?: "",
-                    imageUrl = it.image?.src,
-                    variantTitle = variant.title ?: "",
-                    inventoryItemId = variant.inventoryItemId ?: 0L,
-                    quantity = variant.inventoryQuantity ?: 0,
-                    price = variant.price ?: "0.0"
+                    title = product.title ?: "",
+                    imageUrl = product.image?.src,
+                    variantTitle = variant?.title ?: "",
+                    inventoryItemId = variant?.inventoryItemId ?: 0L,
+                    quantity = variant?.inventoryQuantity ?: 0,
+                    price = variant?.price ?: "0.0"
                 )
-            }
+            } ?: emptyList()
         }
 
         emit(inventoryItems)
     }
 
+
+    override suspend fun assignProductToCollection(
+        productId: Long,
+        collectionId: Long
+    ): Flow<Unit> {
+        return remoteDataSource.assignProductToCollection(productId,collectionId)
+    }
 
     companion object {
         private var INSTANCE: RepositoryImpl? = null

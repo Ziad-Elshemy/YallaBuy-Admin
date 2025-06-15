@@ -21,7 +21,7 @@ interface RemoteDataSource {
     suspend fun updateProduct(id: Long, productBody: UpdateProductRequest): Flow<ProductsItem?>
     suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?>
     suspend fun deleteProductImage(productId: Long, imageId: Long): Flow<Unit?>
-    suspend fun createProduct(product: ProductsItem): Flow<ProductsItem>
+    suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?>
     suspend fun getAllVendors(): Flow<ProductsResponse>
     suspend fun getAllProductTypes(): Flow<ProductsResponse>
     suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int>
@@ -42,6 +42,10 @@ interface RemoteDataSource {
 
     suspend fun getAllVariants(): List<VariantsItem>
     suspend fun getAllProductsForVariants(): List<ProductsItem>
+    suspend fun getAllProductsWithVariants(): List<ProductsItem>
+
+
+    suspend fun assignProductToCollection(productId: Long, collectionId: Long): Flow<Unit>
 
 
 
