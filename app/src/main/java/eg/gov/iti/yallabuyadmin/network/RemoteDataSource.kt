@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
@@ -46,6 +47,8 @@ interface RemoteDataSource {
 
 
     suspend fun assignProductToCollection(productId: Long, collectionId: Long): Flow<Unit>
+    suspend fun getCollectsForProduct(productId: Long): List<CollectItem>
+    suspend fun deleteCollect(collectId: Long)
 
 
 

@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network.api
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectsResponse
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleResponse
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
@@ -26,6 +27,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ShopifyApi {
     @GET("products.json")
@@ -146,6 +148,14 @@ interface ShopifyApi {
     suspend fun assignToCollection(
         @Body body: Map<String, @JvmSuppressWildcards Any>
     ): Response<Unit>
+
+    @GET("collects.json")
+    suspend fun getCollects(
+        @Query("product_id") productId: Long
+    ): Response<CollectsResponse>
+
+    @DELETE("collects/{id}.json")
+    suspend fun deleteCollect(@Path("id") collectId: Long): Response<Unit>
 
 
 

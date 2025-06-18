@@ -1,12 +1,15 @@
 package eg.gov.iti.yallabuyadmin.productdetails
 
 import android.util.Log
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.FixedCollection
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.fixedCollections
 import eg.gov.iti.yallabuyadmin.utils.Constants.SHOPIFY_LOCATION_ID
 import eg.iti.mad.climaguard.repo.Repository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,9 +37,14 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
     private val _productTypes = MutableStateFlow<Response<List<String>>>(Response.Loading)
     val productTypes = _productTypes.asStateFlow()
 
-    fun loadInitialData() {
+    private val _productCollectionId = MutableStateFlow<Response<FixedCollection?>>(Response.Loading)
+    val productCollectionId = _productCollectionId.asStateFlow()
+
+
+    fun loadInitialData(productId: Long) {
         getAllVendors()
         getAllProductTypes()
+        getProductCollection(productId)
     }
 
     private fun getAllVendors() {
@@ -71,17 +79,31 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
         }
     }
 
+    private fun getProductCollection(productId: Long) {
+        viewModelScope.launch {
+            repo.getCollectsForProduct(productId)
+                .catch { _productCollectionId.value = Response.Failure(it) }
+                .collect { productCollectionId ->
+                    val productCollection = fixedCollections.firstOrNull {
+                        it.id == productCollectionId
+                    }
+                    _productCollectionId.value = Response.Success(productCollection)
+
+                }
+        }
+    }
+
     fun fetchProductById(id: Long) {
         viewModelScope.launch {
             val response = repo.getProductById(id)
-            Log.e(TAG, "fetchProductById: called with id = $id", )
+            Log.e(TAG, "fetchProductById: called with id = $id")
             response
                 .catch { ex ->
                     _productDetails.value = Response.Failure(ex)
                 }
                 .collect {
                     _productDetails.value = Response.Success(it)
-                    Log.e(TAG, "fetchProductById: called with title = ${it?.title} ", )
+                    Log.e(TAG, "fetchProductById: called with title = ${it?.title} ")
                 }
         }
     }
@@ -103,30 +125,33 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
                         }
 
 
-
                         val updatedVariants = updatedProduct.variants ?: emptyList()
                         val requestedVariants = body.product.variants ?: emptyList()
 
-                        updatedVariants.zip(requestedVariants).forEach { (shopifyVariant, inputVariant) ->
-                            val inventoryItemId = shopifyVariant?.inventoryItemId
-                            val quantity = inputVariant?.inventoryQuantity
+                        updatedVariants.zip(requestedVariants)
+                            .forEach { (shopifyVariant, inputVariant) ->
+                                val inventoryItemId = shopifyVariant?.inventoryItemId
+                                val quantity = inputVariant?.inventoryQuantity
 
-                            if (inventoryItemId != null && quantity != null) {
-                                repo.setInventory(
-                                    locationId = SHOPIFY_LOCATION_ID,
-                                    inventoryItemId = inventoryItemId,
-                                    available = quantity
-                                )
-                                    .catch {
+                                if (inventoryItemId != null && quantity != null) {
+                                    repo.setInventory(
+                                        locationId = SHOPIFY_LOCATION_ID,
+                                        inventoryItemId = inventoryItemId,
+                                        available = quantity
+                                    )
+                                        .catch {
 //                                        _toastMessage.emit("Update failed: ${it.message}")
-                                        Log.e(TAG, "updateProductDetails: error = ${it.localizedMessage}", )
-                                    }
-                                    .collect { res ->
+                                            Log.e(
+                                                TAG,
+                                                "updateProductDetails: error = ${it.localizedMessage}",
+                                            )
+                                        }
+                                        .collect { res ->
 //                                        _toastMessage.emit("Inventory updated successfully q = $res")
-                                        Log.d(TAG, "updateProductDetails: quantity = $res")
-                                    }
+                                            Log.d(TAG, "updateProductDetails: quantity = $res")
+                                        }
+                                }
                             }
-                        }
 
 
                         fetchProductById(productId)
@@ -138,14 +163,14 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
     }
 
 
-    fun addImageToProduct(productId: Long, body: AddImageRequest){
+    fun addImageToProduct(productId: Long, body: AddImageRequest) {
         viewModelScope.launch {
-            repo.addProductImage(productId,body)
+            repo.addProductImage(productId, body)
                 .catch { ex ->
                     _toastMessage.emit("add image failed ${ex.message}")
                 }
-                .collect{ imageItem ->
-                    if (imageItem != null){
+                .collect { imageItem ->
+                    if (imageItem != null) {
                         _toastMessage.emit("Image added successfully")
                         fetchProductById(productId)
                     } else {
@@ -155,15 +180,15 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
         }
     }
 
-    fun deleteProductImage(productId: Long, imageId: Long){
+    fun deleteProductImage(productId: Long, imageId: Long) {
         viewModelScope.launch {
-            val response = repo.deleteProductImage(productId,imageId)
+            val response = repo.deleteProductImage(productId, imageId)
             response
                 .catch { ex ->
                     _toastMessage.emit("delete image failed ${ex.message}")
                 }
                 .collect { unit ->
-                    if (unit != null){
+                    if (unit != null) {
                         _toastMessage.emit("Image deleted successfully")
                         fetchProductById(productId)
                     } else {
@@ -171,6 +196,36 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
                     }
                 }
         }
+    }
+
+
+    fun updateCollection(productId: Long, collectionId: Long) {
+
+        viewModelScope.launch {
+            val response = repo.deleteProductFromAllCollections(productId)
+            response
+                .catch { ex ->
+                    _toastMessage.emit("delete collection failed ${ex.message}")
+                }
+                .collect {
+
+                    _toastMessage.emit("collection deleted successfully")
+                    repo.assignProductToCollection(productId, collectionId)
+                        .catch { ex ->
+                            _toastMessage.emit("Collection Assignment Error: ${ex.message}")
+                            Log.i("assignProductToCollection", "Error: ${ex.message} ")
+                        }
+                        .collect {
+                            _toastMessage.emit("collection updated successfully")
+                            Log.i(
+                                "assignProductToCollection",
+                                "added to collection successfully"
+                            )
+                        }
+
+                }
+        }
+
     }
 
 

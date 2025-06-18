@@ -42,5 +42,8 @@ interface Repository {
 
 
     suspend fun assignProductToCollection(productId: Long, collectionId: Long): Flow<Unit>
+    suspend fun deleteProductFromAllCollections(productId: Long): Flow<Unit>
+    suspend fun getCollectsForProduct(productId: Long): Flow<Long>
+
 
 }

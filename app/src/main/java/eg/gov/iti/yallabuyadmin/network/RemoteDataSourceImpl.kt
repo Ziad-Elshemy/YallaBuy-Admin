@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
@@ -226,4 +227,26 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         if (response.isSuccessful) emit(Unit)
         else throw Exception("Failed to assign to collection: ${response.code()}")
     }
+
+
+    override suspend fun getCollectsForProduct(productId: Long): List<CollectItem> {
+        val response = services.getCollects(productId)
+        if (response.isSuccessful) {
+            return response.body()?.collects ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch collects for product $productId")
+        }
+    }
+
+    override suspend fun deleteCollect(collectId: Long) {
+        val response = services.deleteCollect(collectId)
+        if (!response.isSuccessful) {
+            throw Exception("Failed to delete collect with id $collectId")
+        }
+    }
+
+
+
+
+
 }

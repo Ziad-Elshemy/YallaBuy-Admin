@@ -2,6 +2,7 @@ package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
@@ -151,6 +152,26 @@ class RepositoryImpl(
     ): Flow<Unit> {
         return remoteDataSource.assignProductToCollection(productId,collectionId)
     }
+
+    override suspend fun deleteProductFromAllCollections(productId: Long): Flow<Unit> = flow {
+        val collects = remoteDataSource.getCollectsForProduct(productId)
+        collects.forEach {
+            remoteDataSource.deleteCollect(it.id)
+        }
+        emit(Unit)
+    }
+
+    override suspend fun getCollectsForProduct(productId: Long): Flow<Long> = flow {
+        if (remoteDataSource.getCollectsForProduct(productId).isEmpty()){
+            emit(0L)
+        }else{
+            val result = remoteDataSource.getCollectsForProduct(productId).get(0).collection_id
+            emit(result)
+        }
+
+    }
+
+
 
     companion object {
         private var INSTANCE: RepositoryImpl? = null
