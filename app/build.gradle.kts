@@ -111,4 +111,18 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
 
 
+
+    // TESTING
+
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    // AndroidX JUnit
+    testImplementation ("io.mockk:mockk:1.13.8")
+    // AndroidX and Robolectric
+    testImplementation ("androidx.test.ext:junit-ktx:1.1.5")
+    testImplementation ("androidx.test:core-ktx:1.5.0")
+    testImplementation ("org.robolectric:robolectric:4.11.1")
+    //kotlinx-coroutines
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+
+
 }
