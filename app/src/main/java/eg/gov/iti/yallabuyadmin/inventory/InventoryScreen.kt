@@ -1,12 +1,15 @@
 package eg.gov.iti.yallabuyadmin.inventory
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,6 +48,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
 import eg.gov.iti.yallabuyadmin.model.Response
+import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
 import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 
 
@@ -58,18 +63,48 @@ fun InventoryScreen(
         viewModel.fetchInventoryItems()
     }
 
-    when (uiState) {
-        is Response.Loading -> LoadingIndicator()
-        is Response.Failure -> Text("Failed to load inventory", color = Color.Red)
-        is Response.Success -> {
-            val items = (uiState as Response.Success<List<InventoryItemUiModel>>).data
-            LazyColumn {
-                items(items) { item ->
-                    InventoryItemCard(
-                        item = item,
-                        onUpdateQuantity = { newQuantity ->
-                            viewModel.updateVariantQuantity(item.inventoryItemId, newQuantity)
-                        })
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        // Header Row with Add and Search Buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Inventory Items",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Row {
+                IconButton(onClick = { /* Search Click */ }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                }
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        when (uiState) {
+            is Response.Loading -> LoadingIndicator()
+            is Response.Failure -> Text("Failed to load inventory", color = Color.Red)
+            is Response.Success -> {
+                val items = (uiState as Response.Success<List<InventoryItemUiModel>>).data
+                LazyColumn {
+                    items(items) { item ->
+                        InventoryItemCard(
+                            item = item,
+                            onUpdateQuantity = { newQuantity ->
+                                viewModel.updateVariantQuantity(item.inventoryItemId, newQuantity)
+                            })
+                    }
                 }
             }
         }
