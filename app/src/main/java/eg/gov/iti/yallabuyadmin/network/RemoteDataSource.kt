@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
@@ -8,6 +9,7 @@ import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.VariantsItem
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
@@ -20,7 +22,7 @@ interface RemoteDataSource {
     suspend fun updateProduct(id: Long, productBody: UpdateProductRequest): Flow<ProductsItem?>
     suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?>
     suspend fun deleteProductImage(productId: Long, imageId: Long): Flow<Unit?>
-    suspend fun createProduct(product: ProductsItem): Flow<ProductsItem>
+    suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?>
     suspend fun getAllVendors(): Flow<ProductsResponse>
     suspend fun getAllProductTypes(): Flow<ProductsResponse>
     suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int>
@@ -37,6 +39,17 @@ interface RemoteDataSource {
     suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Boolean
     suspend fun updateDiscountCode(priceRuleId: Long, discountCodeId: Long, discountCode: DiscountCode): Flow<DiscountCode>
     suspend fun createDiscountCode(ruleId: Long, discountCode: DiscountCode): Flow<DiscountCode>
+
+
+    suspend fun getAllVariants(): List<VariantsItem>
+    suspend fun getAllProductsForVariants(): List<ProductsItem>
+    suspend fun getAllProductsWithVariants(): List<ProductsItem>
+
+
+    suspend fun assignProductToCollection(productId: Long, collectionId: Long): Flow<Unit>
+    suspend fun getCollectsForProduct(productId: Long): List<CollectItem>
+    suspend fun deleteCollect(collectId: Long)
+
 
 
 }

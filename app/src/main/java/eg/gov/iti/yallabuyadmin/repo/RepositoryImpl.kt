@@ -2,8 +2,10 @@ package eg.iti.mad.climaguard.repo
 
 import eg.gov.iti.yallabuyadmin.database.LocalDataSource
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
@@ -47,7 +49,7 @@ class RepositoryImpl(
         return remoteDataSource.deleteProductImage(productId,imageId)
     }
 
-    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem> {
+    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?> {
         return remoteDataSource.createProduct(product)
     }
 
@@ -122,6 +124,54 @@ class RepositoryImpl(
     ): Flow<DiscountCode> {
         return remoteDataSource.createDiscountCode(ruleId,discountCode)
     }
+
+
+    override suspend fun getInventoryItems(): Flow<List<InventoryItemUiModel>> = flow {
+        val products = remoteDataSource.getAllProductsWithVariants()
+
+        val inventoryItems = products.flatMap { product ->
+            product.variants?.mapNotNull { variant ->
+                InventoryItemUiModel(
+                    title = product.title ?: "",
+                    imageUrl = product.image?.src,
+                    variantTitle = variant?.title ?: "",
+                    inventoryItemId = variant?.inventoryItemId ?: 0L,
+                    quantity = variant?.inventoryQuantity ?: 0,
+                    price = variant?.price ?: "0.0"
+                )
+            } ?: emptyList()
+        }
+
+        emit(inventoryItems)
+    }
+
+
+    override suspend fun assignProductToCollection(
+        productId: Long,
+        collectionId: Long
+    ): Flow<Unit> {
+        return remoteDataSource.assignProductToCollection(productId,collectionId)
+    }
+
+    override suspend fun deleteProductFromAllCollections(productId: Long): Flow<Unit> = flow {
+        val collects = remoteDataSource.getCollectsForProduct(productId)
+        collects.forEach {
+            remoteDataSource.deleteCollect(it.id)
+        }
+        emit(Unit)
+    }
+
+    override suspend fun getCollectsForProduct(productId: Long): Flow<Long> = flow {
+        if (remoteDataSource.getCollectsForProduct(productId).isEmpty()){
+            emit(0L)
+        }else{
+            val result = remoteDataSource.getCollectsForProduct(productId).get(0).collection_id
+            emit(result)
+        }
+
+    }
+
+
 
     companion object {
         private var INSTANCE: RepositoryImpl? = null

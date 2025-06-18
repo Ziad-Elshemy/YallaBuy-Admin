@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.network
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
@@ -13,6 +14,7 @@ import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.VariantsItem
 import eg.gov.iti.yallabuyadmin.network.api.ShopifyApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -94,10 +96,10 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
-    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem> = flow{
+    override suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?> = flow{
         val response = services.createProduct(CreateProductRequest(product))
         if (response.isSuccessful){
-            response.body()?.let { emit(it) }
+            response.body()?.let { emit(it.product) }
         } else {
             throw Exception("Create product failed with code ${response.code()}")
         }
@@ -181,4 +183,70 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
             throw Exception("Empty response from API")
         }
     }
+
+
+    override suspend fun getAllVariants(): List<VariantsItem> {
+        val response = services.getAllVariants()
+        if (response.isSuccessful) {
+            return response.body()?.variants?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch variants: ${response.code()}")
+        }
+    }
+
+    override suspend fun getAllProductsForVariants(): List<ProductsItem> {
+        val response = services.getAllProducts()
+        if (response.isSuccessful) {
+            return response.body()?.products?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch products: ${response.code()}")
+        }
+    }
+
+    override suspend fun getAllProductsWithVariants(): List<ProductsItem> {
+        val response = services.getAllProductsWithVariants()
+        if (response.isSuccessful) {
+            return response.body()?.products?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch products with variants: ${response.code()}")
+        }
+    }
+
+
+    override suspend fun assignProductToCollection(
+        productId: Long,
+        collectionId: Long
+    ): Flow<Unit>  = flow {
+        val body = mapOf(
+            "collect" to mapOf(
+                "product_id" to productId,
+                "collection_id" to collectionId
+            )
+        )
+        val response = services.assignToCollection(body)
+        if (response.isSuccessful) emit(Unit)
+        else throw Exception("Failed to assign to collection: ${response.code()}")
+    }
+
+
+    override suspend fun getCollectsForProduct(productId: Long): List<CollectItem> {
+        val response = services.getCollects(productId)
+        if (response.isSuccessful) {
+            return response.body()?.collects ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch collects for product $productId")
+        }
+    }
+
+    override suspend fun deleteCollect(collectId: Long) {
+        val response = services.deleteCollect(collectId)
+        if (!response.isSuccessful) {
+            throw Exception("Failed to delete collect with id $collectId")
+        }
+    }
+
+
+
+
+
 }

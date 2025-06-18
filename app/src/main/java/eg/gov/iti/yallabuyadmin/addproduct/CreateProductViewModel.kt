@@ -1,9 +1,11 @@
 package eg.gov.iti.yallabuyadmin.addproduct
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.FixedCollection
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.iti.mad.climaguard.repo.Repository
@@ -69,7 +71,7 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
         }
     }
 
-    fun createProduct(product: ProductsItem) {
+    fun createProduct(product: ProductsItem, selectedCollectionId: Long) {
         viewModelScope.launch {
             _createState.value = Response.Loading
 
@@ -78,9 +80,26 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
                     _createState.value = Response.Failure(ex)
                     _toastMessage.emit("Error: ${ex.message}")
                 }
-                .collect { result ->
-                    _createState.value = Response.Success(result)
-                    _toastMessage.emit("Product created successfully")
+                .collect { createdProduct ->
+                    if (createdProduct != null){
+                        _createState.value = Response.Success(createdProduct)
+                        _toastMessage.emit("Product created successfully")
+                        createdProduct.id?.let { productId ->
+                            repo.assignProductToCollection(productId, selectedCollectionId)
+                                .catch { ex ->
+                                    _toastMessage.emit("Collection Assignment Error: ${ex.message}")
+                                    Log.i("createProduct Collection", "Error: ${ex.message} ")
+                                }
+                                .collect{
+                                    _toastMessage.emit("added to collection successfully")
+                                    Log.i("createProduct Collection", "added to collection successfully")
+                                }
+                        }
+                    }
+                    else{
+                        _toastMessage.emit("Failed to create Product")
+                    }
+
                 }
         }
     }

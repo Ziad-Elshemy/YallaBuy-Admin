@@ -56,12 +56,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.accompanist.flowlayout.FlowRow
+import eg.gov.iti.yallabuyadmin.model.FixedCollection
 import eg.gov.iti.yallabuyadmin.model.Image
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.OptionsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.model.VariantsItem
+import eg.gov.iti.yallabuyadmin.model.fixedCollections
 import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 
 @Composable
@@ -123,8 +125,8 @@ fun CreateProductScreen(
                     CreateProductUI(
                         vendors = (vendorsState as Response.Success<List<String>>).data,
                         productTypes = (productTypesState as Response.Success<List<String>>).data,
-                        onSubmit = {product ->
-                            viewModel.createProduct(product)
+                        onSubmit = {product,selectedCollection  ->
+                            viewModel.createProduct(product,selectedCollection.id )
                         }
                     )
                 }
@@ -149,7 +151,7 @@ fun CreateProductScreen(
 
 @Composable
 fun CreateProductUI(
-    onSubmit: (ProductsItem) -> Unit,
+    onSubmit: (ProductsItem,FixedCollection) -> Unit,
     vendors: List<String>,
     productTypes: List<String>
 ) {
@@ -162,6 +164,8 @@ fun CreateProductUI(
     var selectedType by remember { mutableStateOf(productTypes.firstOrNull() ?: "") }
 //    var tags by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("active") }
+    var selectedCollection by remember { mutableStateOf<FixedCollection?>(null) }
+
 
 //    var price by remember { mutableStateOf("") }
 //    var quantity by remember { mutableStateOf("") }
@@ -221,6 +225,14 @@ fun CreateProductUI(
         // Dropdown for Vendor
         DropdownField("Vendor", selectedVendor, vendors) { selectedVendor = it }
         DropdownField("Product Type", selectedType, productTypes) { selectedType = it }
+        DropdownField(
+            label = "Select Collection",
+            selected = selectedCollection?.title ?: "Choose...",
+            options = fixedCollections.map { it.title }
+        ) { title ->
+            selectedCollection = fixedCollections.firstOrNull { it.title == title }
+        }
+
 
 //        OutlinedTextField(tags, { tags = it }, label = { Text("Tags") })
 
@@ -361,7 +373,7 @@ fun CreateProductUI(
                 variants = variantsList
             )
 
-            onSubmit(product)
+            onSubmit(product,selectedCollection ?: fixedCollections.get(0))
         }) {
             Text("Create Product")
         }
