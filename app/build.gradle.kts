@@ -107,5 +107,8 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-flowlayout:0.34.0")
 
+    implementation ("com.google.maps.android:maps-compose:4.3.2")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+
 
 }

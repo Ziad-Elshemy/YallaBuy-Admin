@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 
 import androidx.compose.material3.Card
@@ -32,26 +33,70 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import eg.gov.iti.yallabuyadmin.R
 import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
+import eg.gov.iti.yallabuyadmin.utils.PrefsHelper
+import kotlinx.coroutines.delay
 
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    LoginScreenUI { username, password ->
-        if (username == "admin" && password == "1234") {
-            navController.navigate(NavigationRoute.Dashboard.route)
-        } else {
-            Log.d("Login", "Invalid credentials")
+    var shouldNavigate by remember { mutableStateOf<Boolean?>(null) }
+
+    LaunchedEffect(Unit) {
+        shouldNavigate = PrefsHelper.isLoggedIn()
+    }
+
+    when (shouldNavigate) {
+        null -> {
+            // Show loading while checking
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        true -> {
+            // Navigate once check is done
+            LaunchedEffect(Unit) {
+                navController.navigate(NavigationRoute.Dashboard.route) {
+                    popUpTo(NavigationRoute.Login.route) { inclusive = true }
+                }
+            }
+        }
+
+        false -> {
+            // Render actual Login UI
+            LoginScreenUI { username, password ->
+                if (username == "admin" && password == "1234") {
+                    PrefsHelper.setIsLoggedIn(true)
+                    navController.navigate(NavigationRoute.Dashboard.route) {
+                        popUpTo(NavigationRoute.Login.route) { inclusive = true }
+                    }
+                } else {
+                    Log.d("Login", "Invalid credentials")
+                }
+            }
         }
     }
 }
+
+
 
 
 @Composable
@@ -109,15 +154,21 @@ fun LoginScreenUI(
                     },
                     visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        val icon = if (isPasswordVisible) Icons.Default.Edit else Icons.Default.CheckCircle
+                        val iconRes = if (isPasswordVisible) R.drawable.visibility_off else R.drawable.visibility_on
                         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                            Icon(icon, contentDescription = null)
+                            Icon(
+                                painter = painterResource(id = iconRes),
+                                contentDescription = null,
+                                Modifier.size(24.dp)
+                            )
                         }
                     }
+
                 )
 
                 Button(
                     onClick = { onLoginClick(username, password) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2CABAB)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,8 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import eg.gov.iti.yallabuyadmin.model.DashboardData
 import eg.gov.iti.yallabuyadmin.model.Response
@@ -66,18 +69,21 @@ fun DashboardCard(title: String, count: Int, iconRes: Int) {
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painter = painterResource(id = iconRes),
                 contentDescription = null,
-                modifier = Modifier.size(72.dp)
+                modifier = Modifier.size(84.dp)
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(22.dp))
             Column {
-                Text(text = title, fontWeight = FontWeight.Bold)
-                Text(text = "Number of Items: $count")
+                Text(text = title, fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2CABAB), fontSize = 20.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = "Number of Items: $count", fontStyle = FontStyle.Italic,
+                    color = Color.Black)
             }
         }
     }
