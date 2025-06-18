@@ -1,9 +1,12 @@
 package eg.gov.iti.yallabuyadmin.network.api
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.CollectsResponse
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.CreatePriceRuleResponse
 import eg.gov.iti.yallabuyadmin.model.CreateProductRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCodeRequest
+import eg.gov.iti.yallabuyadmin.model.DiscountCodeResponse
 import eg.gov.iti.yallabuyadmin.model.DiscountCodesResponse
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.InventorySetRequest
@@ -16,6 +19,7 @@ import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdatePriceRuleRequest
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
+import eg.gov.iti.yallabuyadmin.model.VariantsResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -23,6 +27,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ShopifyApi {
     @GET("products.json")
@@ -67,7 +72,7 @@ interface ShopifyApi {
     @POST("products.json")
     suspend fun createProduct(
         @Body request: CreateProductRequest
-    ): Response<ProductsItem>
+    ): Response<ProductWrapper>
 
     @GET("products.json?fields=vendor")
     suspend fun getVendors(): ProductsResponse
@@ -96,6 +101,11 @@ interface ShopifyApi {
         @Body request: CreatePriceRuleRequest
     ): Response<CreatePriceRuleResponse>
 
+    @DELETE("price_rules/{price_rule_id}.json")
+    suspend fun deletePriceRule(
+        @Path("price_rule_id") priceRuleId: Long,
+    ): Response<Unit>
+
     @GET("price_rules/{id}/discount_codes.json")
     suspend fun getDiscountCodes(
         @Path("id") priceRuleId: Long
@@ -107,6 +117,46 @@ interface ShopifyApi {
         @Path("price_rule_id") priceRuleId: Long,
         @Path("discount_code_id") discountCodeId: Long
     ): Response<Unit>
+
+    @PUT("price_rules/{rule_id}/discount_codes/{discount_id}.json")
+    suspend fun updateDiscountCode(
+        @Path("rule_id") ruleId: Long,
+        @Path("discount_id") discountId: Long,
+        @Body body: DiscountCodeRequest
+    ): Response<DiscountCodeRequest>
+
+
+    @POST("price_rules/{rule_id}/discount_codes.json")
+    suspend fun createDiscountCode(
+        @Path("rule_id") ruleId: Long,
+        @Body body: DiscountCodeRequest
+    ): Response<DiscountCodeResponse>
+
+
+
+    @GET("variants.json")
+    suspend fun getAllVariants(): Response<VariantsResponse>
+
+    @GET("products.json")
+    suspend fun getAllProducts(): Response<ProductsResponse>
+
+    @GET("products.json?limit=250")
+    suspend fun getAllProductsWithVariants(): Response<ProductsResponse>
+
+
+    @POST("collects.json")
+    suspend fun assignToCollection(
+        @Body body: Map<String, @JvmSuppressWildcards Any>
+    ): Response<Unit>
+
+    @GET("collects.json")
+    suspend fun getCollects(
+        @Query("product_id") productId: Long
+    ): Response<CollectsResponse>
+
+    @DELETE("collects/{id}.json")
+    suspend fun deleteCollect(@Path("id") collectId: Long): Response<Unit>
+
 
 
 }

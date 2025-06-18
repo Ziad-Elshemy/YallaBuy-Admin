@@ -1,83 +1,95 @@
 package eg.gov.iti.yallabuyadmin.dashboard
 
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import eg.gov.iti.yallabuyadmin.model.DashboardData
+import eg.gov.iti.yallabuyadmin.model.Response
+import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
+import eg.gov.iti.yallabuyadmin.R
 
 
 @Composable
-fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel) {
-    val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF2CABAB),
-            Color(0xFFE1F5FE)
-        )
-    )
+fun DashboardScreen(navController: NavController,viewModel: DashboardViewModel) {
+    val state by viewModel.dashboardData.collectAsState()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(remember { SnackbarHostState() }) }
-    ) { paddingValues ->
+    LaunchedEffect(Unit) {
+        viewModel.fetchDashboardData()
+    }
 
-        Column(
+    when (state) {
+        is Response.Loading -> LoadingIndicator()
+        is Response.Failure -> Text("Failed to load dashboard", color = Color.Red)
+        is Response.Success -> {
+            val data = (state as Response.Success<DashboardData>).data
+            LazyColumn(modifier = Modifier.padding(16.dp)) {
+                item { DashboardCard("Products", data.productCount, R.drawable.ic_products_dashboard) }
+                item { DashboardCard("Total Product Items", data.inventoryItemsCount, R.drawable.ic_product_items_dashboard) }
+                item { DashboardCard("Vendors", data.vendorsCount, R.drawable.ic_brand_dashboard) }
+                item { DashboardCard("Price Rules", data.priceRuleCount, R.drawable.ic_price_rules_dashboard) }
+                item { DashboardCard("Discounts", data.discountCount, R.drawable.ic_discounts_dashboard) }
+            }
+        }
+    }
+}
+
+@Composable
+fun DashboardCard(title: String, count: Int, iconRes: Int) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-//                .background(brush = backgroundBrush)
-                .background(Color(0xFFF8F9FA))
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            DashboardScreenUI(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+            Image(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(84.dp)
             )
+            Spacer(modifier = Modifier.width(22.dp))
+            Column {
+                Text(text = title, fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2CABAB), fontSize = 20.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = "Number of Items: $count", fontStyle = FontStyle.Italic,
+                    color = Color.Black)
+            }
         }
     }
 }
 
 
-@Composable
-fun DashboardScreenUI(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Dashboard Sreen",
-            fontSize = 16.sp,
-            color = Color.DarkGray,
-            lineHeight = 22.sp
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-    }
-}
 
 
 

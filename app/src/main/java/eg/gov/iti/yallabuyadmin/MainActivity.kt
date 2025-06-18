@@ -24,6 +24,8 @@ import eg.gov.iti.yallabuyadmin.addproduct.CreateProductScreen
 import eg.gov.iti.yallabuyadmin.addproduct.CreateProductViewModel
 import eg.gov.iti.yallabuyadmin.coupons.CouponsScreen
 import eg.gov.iti.yallabuyadmin.coupons.CouponsViewModel
+import eg.gov.iti.yallabuyadmin.creatediscount.CreateDiscountScreen
+import eg.gov.iti.yallabuyadmin.creatediscount.CreateDiscountViewModel
 import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleScreen
 import eg.gov.iti.yallabuyadmin.createpricerule.CreatePriceRuleViewModel
 import eg.gov.iti.yallabuyadmin.dashboard.DashboardScreen
@@ -42,6 +44,8 @@ import eg.gov.iti.yallabuyadmin.products.ProductsScreen
 import eg.gov.iti.yallabuyadmin.products.ProductsViewModel
 import eg.gov.iti.yallabuyadmin.profile.ProfileScreen
 import eg.gov.iti.yallabuyadmin.profile.ProfileViewModel
+import eg.gov.iti.yallabuyadmin.profile.about.AboutUsScreen
+import eg.gov.iti.yallabuyadmin.profile.contact.ContactUsScreen
 import eg.gov.iti.yallabuyadmin.ui.theme.YallaBuyAdminTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -68,7 +72,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
 
                     val graph =
-                        navController.createGraph(startDestination = NavigationRoute.Dashboard.route) {
+                        navController.createGraph(startDestination = NavigationRoute.Login.route) {
 
                             composable(route = NavigationRoute.Products.route) {
                                 val productsViewModel : ProductsViewModel = koinViewModel()
@@ -130,6 +134,18 @@ class MainActivity : ComponentActivity() {
                             composable(NavigationRoute.CreatePriceRule.route) {
                                 val viewModel: CreatePriceRuleViewModel = koinViewModel()
                                 CreatePriceRuleScreen(navController, viewModel)
+                            }
+
+                            composable(NavigationRoute.CreateDiscount.route) {
+                                val viewModel: CreateDiscountViewModel = koinViewModel()
+                                CreateDiscountScreen(navController, viewModel)
+                            }
+
+                            composable(NavigationRoute.AboutUs.route) {
+                                AboutUsScreen(navController)
+                            }
+                            composable(NavigationRoute.ContactUs.route) {
+                                ContactUsScreen(navController)
                             }
 
 

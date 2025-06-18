@@ -1,19 +1,45 @@
 package eg.gov.iti.yallabuyadmin.dashboard
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import eg.gov.iti.yallabuyadmin.model.DashboardData
+import eg.gov.iti.yallabuyadmin.model.Response
 import eg.iti.mad.climaguard.repo.Repository
-
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class DashboardViewModel(private val repo: Repository) : ViewModel() {
-    private val TAG = "DashboardViewModel"
 
-}
+    private val _dashboardData = MutableStateFlow<Response<DashboardData>>(Response.Loading)
+    val dashboardData = _dashboardData.asStateFlow()
 
-class DashboardFactory(private val repo: Repository) : ViewModelProvider.Factory {
+    fun fetchDashboardData() {
+        viewModelScope.launch {
+            combine(
+                repo.getAllProducts(),
+                repo.getInventoryItems(),
+                repo.getAllPriceRules(),
+                repo.getAllDiscountCodes(),
+                repo.getAllVendors()
+            ) { productsResp, inventoryItems, priceRules, discounts, vendorsResp ->
 
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return DashboardViewModel(repo) as T
+                val totalVendors = vendorsResp.products
+                    ?.mapNotNull { it?.vendor }
+                    ?.distinct()
+                    ?.size ?: 0
+
+                val dashboard = DashboardData(
+                    productCount = productsResp.products?.size ?: 0,
+                    priceRuleCount = priceRules.size,
+                    discountCount = discounts.size,
+                    vendorsCount = totalVendors,
+                    inventoryItemsCount = inventoryItems.size
+                )
+
+                Response.Success(dashboard)
+            }
+                .catch { e -> _dashboardData.emit(Response.Failure(e)) }
+                .collect { result -> _dashboardData.emit(result) }
+        }
     }
-
 }

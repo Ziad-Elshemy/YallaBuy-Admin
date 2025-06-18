@@ -70,14 +70,19 @@ import androidx.navigation.NavController
 import com.skydoves.landscapist.glide.GlideImage
 import eg.gov.iti.yallabuyadmin.addproduct.DropdownField
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
+import eg.gov.iti.yallabuyadmin.model.FixedCollection
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
 import eg.gov.iti.yallabuyadmin.model.OptionsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
 import eg.gov.iti.yallabuyadmin.model.VariantsItem
+import eg.gov.iti.yallabuyadmin.model.fixedCollections
 import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 import eg.gov.iti.yallabuyadmin.products.ProductsScreenUI
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -92,12 +97,13 @@ fun ProductDetailsScreen(navController: NavController,
         viewModel.fetchProductById(productId)
     }
     LaunchedEffect(Unit) {
-        viewModel.loadInitialData()
+        viewModel.loadInitialData(productId)
     }
 
     val vendorsState by viewModel.vendors.collectAsStateWithLifecycle()
     val productTypesState by viewModel.productTypes.collectAsStateWithLifecycle()
     val uiState by viewModel.productDetails.collectAsStateWithLifecycle()
+    val collectionsState by viewModel.productCollectionId.collectAsStateWithLifecycle()
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -124,11 +130,11 @@ fun ProductDetailsScreen(navController: NavController,
         ) {
 
             when  {
-                vendorsState is Response.Loading || productTypesState is Response.Loading || uiState is Response.Loading -> {
+                vendorsState is Response.Loading || productTypesState is Response.Loading || uiState is Response.Loading || collectionsState is Response.Loading -> {
                     LoadingIndicator()
                 }
 
-                vendorsState is Response.Failure || productTypesState is Response.Failure || uiState is Response.Failure -> {
+                vendorsState is Response.Failure || productTypesState is Response.Failure || uiState is Response.Failure || collectionsState is Response.Failure -> {
                     Text(
                         text = "Failed to fetch data",
                         modifier = Modifier
@@ -138,7 +144,7 @@ fun ProductDetailsScreen(navController: NavController,
                     )
                 }
 
-                vendorsState is Response.Success && productTypesState is Response.Success && uiState is Response.Success -> {
+                vendorsState is Response.Success && productTypesState is Response.Success && uiState is Response.Success  && collectionsState is Response.Success -> {
 
                     ProductDetailsScreenUI(
                         product = (uiState as Response.Success<ProductsItem?>).data,
@@ -148,6 +154,7 @@ fun ProductDetailsScreen(navController: NavController,
                         ,
                         vendors = (vendorsState as Response.Success<List<String>>).data,
                         productTypes = (productTypesState as Response.Success<List<String>>).data,
+                        collectionsState = (collectionsState as Response.Success<FixedCollection?>).data,
                         onAddNewImageClick = { imageRequest ->
                             viewModel.addImageToProduct(
                                 productId = productId,
@@ -160,7 +167,7 @@ fun ProductDetailsScreen(navController: NavController,
                             viewModel.deleteProductImage(productId,imgId)
                         }
                     )
-                    { updatedProduct ->
+                    { updatedProduct , collectionId ->
                         viewModel.updateProductDetails(
                             productId = productId,
                             body = UpdateProductRequest(
@@ -168,6 +175,15 @@ fun ProductDetailsScreen(navController: NavController,
                             ))
 
 //                        navController.popBackStack()
+
+                        collectionId?.let {
+                            val product = (uiState as Response.Success<ProductsItem?>).data
+                            if (product?.id != null) {
+
+                                viewModel.updateCollection(product.id,it)
+                            }
+                        }
+
                     }
                     Log.e("TAG", "ProductDetailsScreen: ${(uiState as Response.Success<ProductsItem?>).data}", )
                 }
@@ -197,9 +213,10 @@ fun ProductDetailsScreenUI(
     product: ProductsItem?,
     vendors: List<String>,
     productTypes: List<String>,
+    collectionsState: FixedCollection?,
     onAddNewImageClick: (ImagesItem) -> Unit,
     onDeleteClick: (Long) -> Unit,
-    onUpdateClick: (ProductsItem) -> Unit
+    onUpdateClick: (ProductsItem,Long?) -> Unit
 ) {
     var newImgUrl by remember { mutableStateOf("") }
     var title by remember { mutableStateOf(product?.title ?: "") }
@@ -207,6 +224,7 @@ fun ProductDetailsScreenUI(
     var productType by remember { mutableStateOf(product?.productType ?: "") }
     var selectedVendor by remember { mutableStateOf(product?.vendor ?: vendors.firstOrNull() ?: "") }
     var selectedType by remember { mutableStateOf(product?.productType ?: productTypes.firstOrNull() ?: "") }
+    var selectedCollection by remember { mutableStateOf<FixedCollection?>(collectionsState) }
 
     val existingOptions = remember { mutableStateListOf<OptionsItem>() }
     LaunchedEffect(product) {
@@ -297,6 +315,13 @@ fun ProductDetailsScreenUI(
         OutlinedTextField(description, { description = it }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth())
         DropdownField("Vendor", selectedVendor, vendors) { selectedVendor = it }
         DropdownField("Product Type", selectedType, productTypes) { selectedType = it }
+        DropdownField(
+            label = "Select Collection",
+            selected = selectedCollection?.title ?: "Choose...",
+            options = fixedCollections.map { it.title }
+        ) { title ->
+            selectedCollection = fixedCollections.firstOrNull { it.title == title }
+        }
 
         Divider()
 
@@ -372,7 +397,9 @@ fun ProductDetailsScreenUI(
                     options = existingOptions,
                     variants = variants
                 )
-                updatedProduct?.let { onUpdateClick(it) }
+                updatedProduct?.let {
+                    onUpdateClick(it,selectedCollection?.id)
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
