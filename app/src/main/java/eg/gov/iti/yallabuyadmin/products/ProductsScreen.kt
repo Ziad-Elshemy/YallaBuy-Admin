@@ -104,9 +104,9 @@ fun ProductsScreen(
                 style = MaterialTheme.typography.titleLarge
             )
             Row {
-                IconButton(onClick = { /* Search Click */ }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
-                }
+//                IconButton(onClick = { /* Search Click */ }) {
+//                    Icon(Icons.Default.Search, contentDescription = "Search")
+//                }
                 IconButton(onClick = {
                     navController.navigate(NavigationRoute.CreateProduct.route)
                 }) {

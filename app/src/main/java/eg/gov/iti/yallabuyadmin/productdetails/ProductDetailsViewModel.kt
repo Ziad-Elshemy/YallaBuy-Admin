@@ -52,7 +52,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
             repo.getAllVendors()
                 .catch { _vendors.value = Response.Failure(it) }
                 .map { response ->
-                    response.products
+                    response?.products
                         ?.mapNotNull { it?.vendor }
                         ?.distinct()
                         ?: emptyList()
@@ -68,7 +68,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
             repo.getAllProductTypes()
                 .catch { _productTypes.value = Response.Failure(it) }
                 .map { response ->
-                    response.products
+                    response?.products
                         ?.mapNotNull { it?.productType }
                         ?.distinct()
                         ?: emptyList()

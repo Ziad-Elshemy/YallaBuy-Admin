@@ -41,7 +41,7 @@ class FakeRemoteDataSource(
     var updatedProduct: ProductsItem? = null
 
 
-    override suspend fun getAllProducts(): Flow<ProductsResponse> {
+    override suspend fun getAllProducts(): Flow<ProductsResponse?> {
         return flowOf(fakeProductsResponse)
     }
 
@@ -73,11 +73,11 @@ class FakeRemoteDataSource(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllVendors(): Flow<ProductsResponse> {
+    override suspend fun getAllVendors(): Flow<ProductsResponse?> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllProductTypes(): Flow<ProductsResponse> {
+    override suspend fun getAllProductTypes(): Flow<ProductsResponse?> {
         TODO("Not yet implemented")
     }
 

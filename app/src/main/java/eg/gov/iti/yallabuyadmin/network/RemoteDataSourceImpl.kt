@@ -22,19 +22,31 @@ import kotlinx.coroutines.flow.flowOf
 import retrofit2.Response
 
 class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
-    override suspend fun getAllProducts(): Flow<ProductsResponse> {
+    override suspend fun getAllProducts(): Flow<ProductsResponse?> {
         val response = services.getProducts()
-        return flowOf(response)
+        if (response.isSuccessful) {
+            return flowOf(response.body())
+        } else {
+            throw Exception("Create Product failed, code ${response.code()}")
+        }
     }
 
     override suspend fun deleteProduct(id: Long): Flow<Boolean> {
         val response = services.deleteProduct(id)
-        return flowOf(response.isSuccessful)
+        if (response.isSuccessful) {
+            return flowOf(response.isSuccessful)
+        } else {
+            throw Exception("Create Product failed, code ${response.code()}")
+        }
     }
 
     override suspend fun getProductById(id: Long): Flow<ProductsItem?> {
         val response = services.getProductById(id)
-        return flowOf(response.product)
+        if (response.isSuccessful) {
+            return flowOf(response.body()?.product)
+        } else {
+            throw Exception("Create Product failed, code ${response.code()}")
+        }
     }
 
     override suspend fun updateProduct(
@@ -68,14 +80,22 @@ class RemoteDataSourceImpl(private val services: ShopifyApi): RemoteDataSource {
         }
     }
 
-    override suspend fun getAllVendors(): Flow<ProductsResponse> {
+    override suspend fun getAllVendors(): Flow<ProductsResponse?> {
         val response = services.getVendors()
-        return flowOf(response)
+        if (response.isSuccessful) {
+            return flowOf(response.body())
+        } else {
+            throw Exception("Create Product failed, code ${response.code()}")
+        }
     }
 
-    override suspend fun getAllProductTypes(): Flow<ProductsResponse> {
+    override suspend fun getAllProductTypes(): Flow<ProductsResponse?> {
         val response = services.getProductTypes()
-        return flowOf(response)
+        if (response.isSuccessful) {
+            return flowOf(response.body())
+        } else {
+            throw Exception("Create Product failed, code ${response.code()}")
+        }
     }
 
     override suspend fun setInventory(

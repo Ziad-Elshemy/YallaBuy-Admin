@@ -35,8 +35,7 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
     fun fetchProductsItems() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = repo.getAllProducts()
-                response
+                repo.getAllProducts()
                     .catch { ex ->
                         _allProducts.value = Response.Failure(ex)
                         _toastMessage.emit("Error From Api ${ex.message}")
@@ -44,7 +43,7 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
                     }
                     .collect{ data ->
 
-                        _allProducts.value = Response.Success(data.products)
+                        _allProducts.value = Response.Success(data?.products)
 
                     }
             } catch (ex: Exception) {
@@ -81,13 +80,5 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
     }
 
 
-
-}
-
-class ProductsFactory(private val repo: Repository) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ProductsViewModel(repo) as T
-    }
 
 }

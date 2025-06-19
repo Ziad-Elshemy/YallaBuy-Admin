@@ -118,11 +118,14 @@ fun CreatePriceRuleForm(
     var title by remember { mutableStateOf("") }
     var value by remember { mutableStateOf("") }
     var valueType by remember { mutableStateOf("fixed_amount") }
-    var allocationMethod by remember { mutableStateOf("each") }
     var usageLimit by remember { mutableStateOf("0") }
     var oncePerCustomer by remember { mutableStateOf(false) }
     var startsAt by remember { mutableStateOf(LocalDate.now()) }
-    var endsAt by remember { mutableStateOf(startsAt.plusDays(7)) }
+    var endsAt by remember { mutableStateOf(LocalDate.now().plusDays(7)) }
+
+    var dateError by remember { mutableStateOf<String?>(null) }
+
+    val iconRes = if (valueType == "fixed_amount") R.drawable.ic_money else R.drawable.ic_percentage
 
     Column(
         modifier = Modifier
@@ -131,20 +134,17 @@ fun CreatePriceRuleForm(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        val iconRes = if (valueType == "fixed_amount") R.drawable.ic_money else R.drawable.ic_percentage
         Image(
             painter = painterResource(id = iconRes),
             contentDescription = null,
             modifier = Modifier
-                .size(120.dp)
+                .size(100.dp)
                 .align(Alignment.CenterHorizontally)
         )
 
         OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value, { value = it }, label = { Text("Value") }, modifier = Modifier.fillMaxWidth())
-
         DropdownField("Value Type", valueType, listOf("fixed_amount", "percentage")) { valueType = it }
-//        DropdownField("Allocation", allocationMethod, listOf("each", "across")) { allocationMethod = it }
 
         OutlinedTextField(
             usageLimit,
@@ -160,11 +160,21 @@ fun CreatePriceRuleForm(
             Switch(checked = oncePerCustomer, onCheckedChange = { oncePerCustomer = it })
         }
 
-        DatePickerField("Starts At", startsAt) { startsAt = it }
-        DatePickerField("Ends At", endsAt) { endsAt = it }
+        DatePickerField("Start Date", startsAt) { startsAt = it }
+        DatePickerField("End Date", endsAt) { endsAt = it }
+
+        if (dateError != null) {
+            Text(dateError!!, color = Color.Red)
+        }
 
         Button(
             onClick = {
+                if (endsAt.isBefore(startsAt)) {
+                    dateError = "End date must be after start date"
+                    return@Button
+                }
+                dateError = null
+
                 val newRule = PriceRulesItem(
                     title = title,
                     value = value,
@@ -186,6 +196,7 @@ fun CreatePriceRuleForm(
         }
     }
 }
+
 
 
 
