@@ -41,10 +41,3 @@ class EditPriceRuleViewModel(private val repo: Repository) : ViewModel() {
 
 }
 
-class EditPriceRuleFactory(private val repo: Repository) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return EditPriceRuleViewModel(repo) as T
-    }
-
-}

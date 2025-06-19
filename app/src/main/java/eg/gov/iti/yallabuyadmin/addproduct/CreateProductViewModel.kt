@@ -96,11 +96,11 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
                             repo.assignProductToCollection(productId, selectedCollectionId)
                                 .catch { ex ->
                                     _toastMessage.emit("Collection Assignment Error: ${ex.message}")
-                                    Log.i("createProduct Collection", "Error: ${ex.message} ")
+//                                    Log.i("createProduct Collection", "Error: ${ex.message} ")
                                 }
                                 .collect{
                                     _toastMessage.emit("added to collection successfully")
-                                    Log.i("createProduct Collection", "added to collection successfully")
+//                                    Log.i("createProduct Collection", "added to collection successfully")
                                 }
                         }
                     }

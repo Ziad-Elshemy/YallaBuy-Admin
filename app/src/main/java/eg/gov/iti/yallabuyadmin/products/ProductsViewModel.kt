@@ -39,7 +39,7 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
                     .catch { ex ->
                         _allProducts.value = Response.Failure(ex)
                         _toastMessage.emit("Error From Api ${ex.message}")
-                        Log.e("ProductsItemViewModel", "Error collecting products")
+//                        Log.e("ProductsItemViewModel", "Error collecting products")
                     }
                     .collect{ data ->
 
@@ -49,7 +49,7 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
             } catch (ex: Exception) {
                 _toastMessage.emit("Error from coroutines ${ex.message}")
                 _allProducts.value = Response.Failure(ex)
-                Log.e("ProductsItemViewModel", "Error fetching products: ${ex.message}")
+//                Log.e("ProductsItemViewModel", "Error fetching products: ${ex.message}")
             }
         }
     }
@@ -61,20 +61,20 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
                 response
                     .catch {
                         _toastMessage.emit("Failed to delete product: ${id}")
-                        Log.e("Delete", "Failed to delete product: ${id}")
+//                        Log.e("Delete", "Failed to delete product: ${id}")
                     }
                     .collect{isSuccessful ->
                         if (isSuccessful){
                             _toastMessage.emit("Product $id deleted successfully")
                             fetchProductsItems()
-                            Log.d("Delete", "Product $id deleted successfully")
+//                            Log.d("Delete", "Product $id deleted successfully")
                         }else{
                             _toastMessage.emit("Failed to delete product: ${id}")
-                            Log.e("Delete", "Failed to delete product: ${id}")
+//                            Log.e("Delete", "Failed to delete product: ${id}")
                         }
                     }
             } catch (e: Exception) {
-                Log.e("Delete", "Exception: ${e.message}")
+//                Log.e("Delete", "Exception: ${e.message}")
             }
         }
     }

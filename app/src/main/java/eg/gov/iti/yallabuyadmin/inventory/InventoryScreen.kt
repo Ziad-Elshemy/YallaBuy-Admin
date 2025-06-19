@@ -30,6 +30,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +58,8 @@ import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 @Composable
 fun InventoryScreen(
     navController: NavController,
-    viewModel: InventoryViewModel
+    viewModel: InventoryViewModel,
+    snackBarHostState: SnackbarHostState
 ) {
     val uiState by viewModel.inventoryItems.collectAsState()
 
@@ -109,6 +112,18 @@ fun InventoryScreen(
                 }
             }
         }
+
+        LaunchedEffect(key1 = viewModel.toastMessage) {
+            viewModel.toastMessage.collect { message ->
+                if (!message.isNullOrBlank()) {
+                    snackBarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+
     }
 }
 

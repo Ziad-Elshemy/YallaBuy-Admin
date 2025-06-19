@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(route = NavigationRoute.Inventory.route) {
                                 val inventoryViewModel : InventoryViewModel = koinViewModel()
-                                InventoryScreen(navController, inventoryViewModel)
+                                InventoryScreen(navController, inventoryViewModel,snackBarHostState)
                             }
                             composable(route = NavigationRoute.Dashboard.route) {
                                 val dashboardViewModel : DashboardViewModel = koinViewModel()
