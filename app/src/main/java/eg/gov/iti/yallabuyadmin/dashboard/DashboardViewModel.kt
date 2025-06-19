@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import eg.gov.iti.yallabuyadmin.model.DashboardData
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.iti.mad.climaguard.repo.Repository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DashboardViewModel(private val repo: Repository) : ViewModel() {
 
@@ -15,31 +17,39 @@ class DashboardViewModel(private val repo: Repository) : ViewModel() {
 
     fun fetchDashboardData() {
         viewModelScope.launch {
-            combine(
-                repo.getAllProducts(),
-                repo.getInventoryItems(),
-                repo.getAllPriceRules(),
-                repo.getAllDiscountCodes(),
-                repo.getAllVendors()
-            ) { productsResp, inventoryItems, priceRules, discounts, vendorsResp ->
+            try {
+                withContext(Dispatchers.IO) {
+                    combine(
+                        repo.getAllProducts(),
+                        repo.getInventoryItems(),
+                        repo.getAllPriceRules(),
+                        repo.getAllDiscountCodes(),
+                        repo.getAllVendors()
+                    ) { productsResp, inventoryItems, priceRules, discounts, vendorsResp ->
 
-                val totalVendors = vendorsResp.products
-                    ?.mapNotNull { it?.vendor }
-                    ?.distinct()
-                    ?.size ?: 0
+                        val totalVendors = vendorsResp?.products
+                            ?.mapNotNull { it?.vendor }
+                            ?.distinct()
+                            ?.size ?: 0
 
-                val dashboard = DashboardData(
-                    productCount = productsResp.products?.size ?: 0,
-                    priceRuleCount = priceRules.size,
-                    discountCount = discounts.size,
-                    vendorsCount = totalVendors,
-                    inventoryItemsCount = inventoryItems.size
-                )
+                        val dashboard = DashboardData(
+                            productCount = productsResp?.products?.size ?: 0,
+                            priceRuleCount = priceRules.size,
+                            discountCount = discounts.size,
+                            vendorsCount = totalVendors,
+                            inventoryItemsCount = inventoryItems.size
+                        )
 
-                Response.Success(dashboard)
+                        Response.Success(dashboard)
+                    }
+                        .catch { e -> _dashboardData.emit(Response.Failure(e)) }
+                        .collect { result -> _dashboardData.emit(result) }
+                }
+            } catch (e: Exception) {
+                _dashboardData.emit(Response.Failure(e))
             }
-                .catch { e -> _dashboardData.emit(Response.Failure(e)) }
-                .collect { result -> _dashboardData.emit(result) }
         }
+
     }
+
 }

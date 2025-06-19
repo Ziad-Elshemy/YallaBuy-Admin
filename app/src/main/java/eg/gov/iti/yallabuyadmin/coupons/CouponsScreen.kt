@@ -120,9 +120,9 @@ fun CouponsScreen(navController: NavController,
                     style = MaterialTheme.typography.titleLarge
                 )
                 Row {
-                    IconButton(onClick = { /* Search Click */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
+//                    IconButton(onClick = { /* Search Click */ }) {
+//                        Icon(Icons.Default.Search, contentDescription = "Search")
+//                    }
                     IconButton(onClick = {
                         if (currentTab.value == "rules") {
                             navController.navigate(NavigationRoute.CreatePriceRule.route)

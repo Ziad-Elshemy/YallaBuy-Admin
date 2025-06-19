@@ -25,10 +25,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,7 +58,8 @@ import eg.gov.iti.yallabuyadmin.products.LoadingIndicator
 @Composable
 fun InventoryScreen(
     navController: NavController,
-    viewModel: InventoryViewModel
+    viewModel: InventoryViewModel,
+    snackBarHostState: SnackbarHostState
 ) {
     val uiState by viewModel.inventoryItems.collectAsState()
 
@@ -83,9 +87,9 @@ fun InventoryScreen(
                 style = MaterialTheme.typography.titleLarge
             )
             Row {
-                IconButton(onClick = { /* Search Click */ }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
-                }
+//                IconButton(onClick = { /* Search Click */ }) {
+//                    Icon(Icons.Default.Search, contentDescription = "Search")
+//                }
             }
 
         }
@@ -108,6 +112,18 @@ fun InventoryScreen(
                 }
             }
         }
+
+        LaunchedEffect(key1 = viewModel.toastMessage) {
+            viewModel.toastMessage.collect { message ->
+                if (!message.isNullOrBlank()) {
+                    snackBarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+
     }
 }
 
@@ -123,7 +139,13 @@ fun InventoryItemCard(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { showDialog = true }, // open popup
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardColors(
+            containerColor = Color.White,
+            contentColor = Color.Black,
+            disabledContentColor = Color.White,
+            disabledContainerColor = Color.White
+        ),
     ) {
         // Layout here (title, quantity, etc.)
         Row(modifier = Modifier.padding(16.dp)) {
@@ -131,7 +153,9 @@ fun InventoryItemCard(
                 AsyncImage(
                     model = image,
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(120.dp)
                 )
                 Spacer(Modifier.width(8.dp))
             }

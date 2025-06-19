@@ -117,11 +117,3 @@ class CouponsViewModel(private val repo: Repository) : ViewModel() {
 
 
 }
-
-class CouponsFactory(private val repo: Repository) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return CouponsViewModel(repo) as T
-    }
-
-}

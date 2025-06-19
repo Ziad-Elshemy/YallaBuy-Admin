@@ -41,35 +41,43 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
 
     private fun getAllVendors() {
         viewModelScope.launch {
-            repo.getAllVendors()
-                .catch { _vendors.value = Response.Failure(it) }
-                .map { response ->
-                    response.products
-                        ?.mapNotNull { it?.vendor }
-                        ?.distinct()
-                        ?: emptyList()
-                }
-                .collect { vendorsList ->
-                    _vendors.value = Response.Success(vendorsList)
-                }
+            try {
+                repo.getAllVendors()
+                    .map { response ->
+                        response?.products
+                            ?.mapNotNull { it?.vendor }
+                            ?.distinct()
+                            ?: emptyList()
+                    }
+                    .collect { vendorsList ->
+                        _vendors.value = Response.Success(vendorsList)
+                    }
+            } catch (e: Exception) {
+                _vendors.value = Response.Failure(e)
+            }
         }
     }
 
+
     private fun getAllProductTypes() {
         viewModelScope.launch {
-            repo.getAllProductTypes()
-                .catch { _productTypes.value = Response.Failure(it) }
-                .map { response ->
-                    response.products
-                        ?.mapNotNull { it?.productType }
-                        ?.distinct()
-                        ?: emptyList()
-                }
-                .collect { productTypesList ->
-                    _productTypes.value = Response.Success(productTypesList)
-                }
+            try {
+                repo.getAllProductTypes()
+                    .map { response ->
+                        response?.products
+                            ?.mapNotNull { it?.productType }
+                            ?.distinct()
+                            ?: emptyList()
+                    }
+                    .collect { productTypesList ->
+                        _productTypes.value = Response.Success(productTypesList)
+                    }
+            } catch (e: Exception) {
+                _productTypes.value = Response.Failure(e)
+            }
         }
     }
+
 
     fun createProduct(product: ProductsItem, selectedCollectionId: Long) {
         viewModelScope.launch {
@@ -88,11 +96,11 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
                             repo.assignProductToCollection(productId, selectedCollectionId)
                                 .catch { ex ->
                                     _toastMessage.emit("Collection Assignment Error: ${ex.message}")
-                                    Log.i("createProduct Collection", "Error: ${ex.message} ")
+//                                    Log.i("createProduct Collection", "Error: ${ex.message} ")
                                 }
                                 .collect{
                                     _toastMessage.emit("added to collection successfully")
-                                    Log.i("createProduct Collection", "added to collection successfully")
+//                                    Log.i("createProduct Collection", "added to collection successfully")
                                 }
                         }
                     }
@@ -105,10 +113,3 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
     }
 }
 
-class CreateProductFactory(private val repo: Repository) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return CreateProductViewModel(repo) as T
-    }
-
-}
