@@ -23,6 +23,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -84,14 +86,7 @@ fun EditPriceRuleScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF2CABAB),
-                            Color(0xFFE1F5FE)
-                        )
-                    )
-                )
+                .background(Color(0xFFF8F9FA))
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
@@ -211,7 +206,8 @@ fun EditPriceRuleForm(
                 )
                 onSaveClick(updated)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
         ) {
             Text("Save Price Rule Changes")
         }

@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.inventory
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,10 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import eg.gov.iti.yallabuyadmin.R
 import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
@@ -86,7 +89,19 @@ fun InventoryScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Inventory Items", style = MaterialTheme.typography.titleLarge)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = "App Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .padding(end = 8.dp)
+                )
+                Text("Inventory Items", style = MaterialTheme.typography.titleLarge)
+            }
             IconButton(onClick = {
                 searchVisible = !searchVisible
                 if (!searchVisible) viewModel.onSearchQueryChanged("") // clear search when hiding
@@ -209,7 +224,8 @@ fun QuantityUpdateDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = { onConfirm(quantity) }) {
+            Button(onClick = { onConfirm(quantity) },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))) {
                 Text("Save Changes")
             }
         },

@@ -205,14 +205,14 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
                 }
                 .collect {
 
-                    _toastMessage.emit("collection deleted successfully")
+//                    _toastMessage.emit("collection deleted successfully")
                     repo.assignProductToCollection(productId, collectionId)
                         .catch { ex ->
                             _toastMessage.emit("Collection Assignment Error: ${ex.message}")
                             Log.i("assignProductToCollection", "Error: ${ex.message} ")
                         }
                         .collect {
-                            _toastMessage.emit("collection updated successfully")
+//                            _toastMessage.emit("collection updated successfully")
                             Log.i(
                                 "assignProductToCollection",
                                 "added to collection successfully"

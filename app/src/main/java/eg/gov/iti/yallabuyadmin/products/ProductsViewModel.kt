@@ -64,11 +64,11 @@ class ProductsViewModel(private val repo: Repository) : ViewModel() {
             try {
                 repo.deleteProduct(id)
                     .catch {
-                        _toastMessage.emit("Failed to delete product: ${id}")
+                        _toastMessage.emit("Failed to delete product: ${it.localizedMessage}")
                     }
                     .collect { isSuccessful ->
                         if (isSuccessful) {
-                            _toastMessage.emit("Product $id deleted successfully")
+                            _toastMessage.emit("Product deleted successfully")
                             fetchProductsItems()
                         } else {
                             _toastMessage.emit("Failed to delete product: ${id}")
