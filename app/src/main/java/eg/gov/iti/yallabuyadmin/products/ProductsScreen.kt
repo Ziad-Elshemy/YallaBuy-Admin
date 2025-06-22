@@ -56,7 +56,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -78,59 +80,57 @@ fun ProductsScreen(
     viewModel: ProductsViewModel,
     snackBarHostState: SnackbarHostState
 ) {
-
-
-    viewModel.fetchProductsItems()
+    // Fetch once
+    LaunchedEffect(Unit) {
+        viewModel.fetchProductsItems()
+    }
 
     val uiState by viewModel.allProducts.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredProducts by viewModel.filteredProducts.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF8F9FA))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp)
     ) {
 
-        // Header Row with Add and Search Buttons
+        // Header Row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "Products",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Row {
-//                IconButton(onClick = { /* Search Click */ }) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search")
-//                }
-                IconButton(onClick = {
-                    navController.navigate(NavigationRoute.CreateProduct.route)
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
-                }
-            }
+            Text("Products", style = MaterialTheme.typography.titleLarge)
 
+            IconButton(onClick = {
+                navController.navigate(NavigationRoute.CreateProduct.route)
+            }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Search Field
+        TextField(
+            value = searchQuery,
+            onValueChange = { viewModel.onSearchQueryChanged(it) },
+            placeholder = { Text("Search products...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         when (uiState) {
-            is Response.Loading -> {
-                LoadingIndicator()
-            }
-
+            is Response.Loading -> LoadingIndicator()
             is Response.Success -> {
                 ProductsScreenUI(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
                     navController = navController,
-                    viewModel,
-                    (uiState as Response.Success<List<ProductsItem?>?>).data
+                    viewModel = viewModel,
+                    products = filteredProducts
                 )
             }
 
@@ -143,8 +143,6 @@ fun ProductsScreen(
                     fontSize = 22.sp
                 )
             }
-
-
         }
 
         LaunchedEffect(key1 = viewModel.toastMessage) {
@@ -157,10 +155,9 @@ fun ProductsScreen(
                 }
             }
         }
-
     }
-//    }
 }
+
 
 
 @Composable

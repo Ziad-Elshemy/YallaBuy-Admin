@@ -346,18 +346,18 @@ fun ProductDetailsScreenUI(
             }
         }
 
-        if (existingOptions.size < 3) {
-            var newOptionName by remember { mutableStateOf("") }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(newOptionName, { newOptionName = it }, label = { Text("Add Option") }, modifier = Modifier.weight(1f))
-                IconButton(onClick = {
-                    if (newOptionName.isNotBlank()) {
-                        existingOptions.add(OptionsItem(name = newOptionName, values = emptyList()))
-                        newOptionName = ""
-                    }
-                }) { Icon(Icons.Default.Add, contentDescription = "Add Option") }
-            }
-        }
+//        if (existingOptions.size < 3) {
+//            var newOptionName by remember { mutableStateOf("") }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                OutlinedTextField(newOptionName, { newOptionName = it }, label = { Text("Add Option") }, modifier = Modifier.weight(1f))
+//                IconButton(onClick = {
+//                    if (newOptionName.isNotBlank()) {
+//                        existingOptions.add(OptionsItem(name = newOptionName, values = emptyList()))
+//                        newOptionName = ""
+//                    }
+//                }) { Icon(Icons.Default.Add, contentDescription = "Add Option") }
+//            }
+//        }
 
         Divider()
         Text("Define Variants", style = MaterialTheme.typography.titleMedium)

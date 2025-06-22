@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,6 +63,10 @@ fun InventoryScreen(
     snackBarHostState: SnackbarHostState
 ) {
     val uiState by viewModel.inventoryItems.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredItems by viewModel.filteredInventoryItems.collectAsState()
+
+    var searchVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchInventoryItems()
@@ -76,22 +81,30 @@ fun InventoryScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // Header Row with Add and Search Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "Inventory Items",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Row {
-//                IconButton(onClick = { /* Search Click */ }) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search")
-//                }
+            Text("Inventory Items", style = MaterialTheme.typography.titleLarge)
+            IconButton(onClick = {
+                searchVisible = !searchVisible
+                if (!searchVisible) viewModel.onSearchQueryChanged("") // clear search when hiding
+            }) {
+                Icon(Icons.Default.Search, contentDescription = "Search")
             }
+        }
 
+
+        if (searchVisible) {
+            Spacer(modifier = Modifier.height(8.dp))
+            TextField(
+                value = searchQuery,
+                onValueChange = { viewModel.onSearchQueryChanged(it) },
+                placeholder = { Text("Search inventory...") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -100,14 +113,14 @@ fun InventoryScreen(
             is Response.Loading -> LoadingIndicator()
             is Response.Failure -> Text("Failed to load inventory", color = Color.Red)
             is Response.Success -> {
-                val items = (uiState as Response.Success<List<InventoryItemUiModel>>).data
                 LazyColumn {
-                    items(items) { item ->
+                    items(filteredItems) { item ->
                         InventoryItemCard(
                             item = item,
                             onUpdateQuantity = { newQuantity ->
                                 viewModel.updateVariantQuantity(item.inventoryItemId, newQuantity)
-                            })
+                            }
+                        )
                     }
                 }
             }
@@ -123,9 +136,10 @@ fun InventoryScreen(
                 }
             }
         }
-
     }
 }
+
+
 
 @Composable
 fun InventoryItemCard(
