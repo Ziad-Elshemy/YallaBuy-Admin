@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -115,10 +116,23 @@ fun CouponsScreen(navController: NavController,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    if (currentTab.value == "rules") "Price Rules" else "Discount Codes",
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_logo),
+                        contentDescription = "App Logo",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .padding(end = 8.dp)
+                    )
+                    Text(
+                            if (currentTab.value == "rules") "Price Rules" else "Discount Codes",
                     style = MaterialTheme.typography.titleLarge
-                )
+                    )
+                }
+
                 Row {
 //                    IconButton(onClick = { /* Search Click */ }) {
 //                        Icon(Icons.Default.Search, contentDescription = "Search")

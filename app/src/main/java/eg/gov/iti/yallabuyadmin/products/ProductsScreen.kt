@@ -2,6 +2,7 @@ package eg.gov.iti.yallabuyadmin.products
 
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,21 +52,29 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.skydoves.landscapist.glide.GlideImage
+import eg.gov.iti.yallabuyadmin.R
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
@@ -78,59 +87,69 @@ fun ProductsScreen(
     viewModel: ProductsViewModel,
     snackBarHostState: SnackbarHostState
 ) {
-
-
-    viewModel.fetchProductsItems()
+    // Fetch once
+    LaunchedEffect(Unit) {
+        viewModel.fetchProductsItems()
+    }
 
     val uiState by viewModel.allProducts.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredProducts by viewModel.filteredProducts.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF8F9FA))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp)
     ) {
 
-        // Header Row with Add and Search Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "Products",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Row {
-//                IconButton(onClick = { /* Search Click */ }) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search")
-//                }
-                IconButton(onClick = {
-                    navController.navigate(NavigationRoute.CreateProduct.route)
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = "App Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .padding(end = 8.dp)
+                )
+                Text("Products", style = MaterialTheme.typography.titleLarge)
             }
 
+            IconButton(onClick = {
+                navController.navigate(NavigationRoute.CreateProduct.route)
+            }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
         }
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Search Field
+        TextField(
+            value = searchQuery,
+            onValueChange = { viewModel.onSearchQueryChanged(it) },
+            placeholder = { Text("Search products...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         when (uiState) {
-            is Response.Loading -> {
-                LoadingIndicator()
-            }
-
+            is Response.Loading -> LoadingIndicator()
             is Response.Success -> {
                 ProductsScreenUI(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
                     navController = navController,
-                    viewModel,
-                    (uiState as Response.Success<List<ProductsItem?>?>).data
+                    viewModel = viewModel,
+                    products = filteredProducts
                 )
             }
 
@@ -143,8 +162,6 @@ fun ProductsScreen(
                     fontSize = 22.sp
                 )
             }
-
-
         }
 
         LaunchedEffect(key1 = viewModel.toastMessage) {
@@ -157,10 +174,9 @@ fun ProductsScreen(
                 }
             }
         }
-
     }
-//    }
 }
+
 
 
 @Composable
@@ -219,6 +235,29 @@ fun ProductItem(
     val quantity = product?.variants?.firstOrNull()?.inventoryQuantity ?: 0
 
 
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Delete This Product") },
+            text = { Text("Are you sure you want to delete the product: ${product?.title}?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    onDeleteClick()
+                }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Box(modifier = Modifier.padding(4.dp)) {
         Log.e("ProductItem", "ProductItem: id = ${product?.id}")
         Card(
@@ -261,7 +300,16 @@ fun ProductItem(
                                 .fillMaxSize()
                                 .clip(RoundedCornerShape(10.dp)),
                             loading = {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(42.dp),
+                                        strokeWidth = 4.dp,
+                                        color = Color(0xFF009688)
+                                    )
+                                }
                             },
                             failure = {
                                 Icon(Icons.Default.Build, contentDescription = "Failed to load")
@@ -329,7 +377,7 @@ fun ProductItem(
                 .clip(CircleShape)
                 .background(Color.White)
                 .align(Alignment.TopEnd)
-                .clickable(onClick = onDeleteClick),
+                .clickable(onClick = { showDialog = true }),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -353,7 +401,9 @@ fun LoadingIndicator() {
             .fillMaxSize()
             .wrapContentSize()
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            color = Color(0xFF009688)
+        )
     }
 
 }

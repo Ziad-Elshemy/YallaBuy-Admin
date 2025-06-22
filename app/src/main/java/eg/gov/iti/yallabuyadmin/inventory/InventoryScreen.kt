@@ -1,6 +1,7 @@
 package eg.gov.iti.yallabuyadmin.inventory
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,10 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import eg.gov.iti.yallabuyadmin.R
 import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
 import eg.gov.iti.yallabuyadmin.model.Response
 import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
@@ -62,6 +66,10 @@ fun InventoryScreen(
     snackBarHostState: SnackbarHostState
 ) {
     val uiState by viewModel.inventoryItems.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredItems by viewModel.filteredInventoryItems.collectAsState()
+
+    var searchVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchInventoryItems()
@@ -76,22 +84,42 @@ fun InventoryScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // Header Row with Add and Search Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "Inventory Items",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Row {
-//                IconButton(onClick = { /* Search Click */ }) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search")
-//                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = "App Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .padding(end = 8.dp)
+                )
+                Text("Inventory Items", style = MaterialTheme.typography.titleLarge)
             }
+            IconButton(onClick = {
+                searchVisible = !searchVisible
+                if (!searchVisible) viewModel.onSearchQueryChanged("") // clear search when hiding
+            }) {
+                Icon(Icons.Default.Search, contentDescription = "Search")
+            }
+        }
 
+
+        if (searchVisible) {
+            Spacer(modifier = Modifier.height(8.dp))
+            TextField(
+                value = searchQuery,
+                onValueChange = { viewModel.onSearchQueryChanged(it) },
+                placeholder = { Text("Search inventory...") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -100,14 +128,14 @@ fun InventoryScreen(
             is Response.Loading -> LoadingIndicator()
             is Response.Failure -> Text("Failed to load inventory", color = Color.Red)
             is Response.Success -> {
-                val items = (uiState as Response.Success<List<InventoryItemUiModel>>).data
                 LazyColumn {
-                    items(items) { item ->
+                    items(filteredItems) { item ->
                         InventoryItemCard(
                             item = item,
                             onUpdateQuantity = { newQuantity ->
                                 viewModel.updateVariantQuantity(item.inventoryItemId, newQuantity)
-                            })
+                            }
+                        )
                     }
                 }
             }
@@ -123,9 +151,10 @@ fun InventoryScreen(
                 }
             }
         }
-
     }
 }
+
+
 
 @Composable
 fun InventoryItemCard(
@@ -195,7 +224,8 @@ fun QuantityUpdateDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = { onConfirm(quantity) }) {
+            Button(onClick = { onConfirm(quantity) },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))) {
                 Text("Save Changes")
             }
         },

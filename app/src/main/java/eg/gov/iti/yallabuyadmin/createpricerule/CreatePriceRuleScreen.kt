@@ -71,14 +71,7 @@ fun CreatePriceRuleScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF2CABAB),
-                            Color(0xFFE1F5FE)
-                        )
-                    )
-                )
+                .background(Color(0xFFF8F9FA))
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {

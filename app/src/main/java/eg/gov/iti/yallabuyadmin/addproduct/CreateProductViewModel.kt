@@ -99,7 +99,7 @@ class CreateProductViewModel(private val repo: Repository) : ViewModel() {
 //                                    Log.i("createProduct Collection", "Error: ${ex.message} ")
                                 }
                                 .collect{
-                                    _toastMessage.emit("added to collection successfully")
+//                                    _toastMessage.emit("added to collection successfully")
 //                                    Log.i("createProduct Collection", "added to collection successfully")
                                 }
                         }
