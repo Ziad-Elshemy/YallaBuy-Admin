@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -287,7 +288,9 @@ fun CreateProductUI(
                         optionValues[option]?.add(newValue)
                         newValue = ""
                     }
-                }) { Text("Add") }
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
+                ) { Text("Add") }
             }
 
             // Show values added
@@ -348,7 +351,8 @@ fun CreateProductUI(
 //                    variantSku = ""
                     selectedValues.clear()
                 }
-            }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
         ) {
             Text("Add Variant")
         }
@@ -372,7 +376,9 @@ fun CreateProductUI(
             )
 
             onSubmit(product, selectedCollection ?: fixedCollections.get(0))
-        }) {
+        },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
+        ) {
             Text("Create Product")
         }
     }

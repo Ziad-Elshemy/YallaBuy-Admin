@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable(route = NavigationRoute.Login.route) {
-                                LoginScreen(navController)
+                                LoginScreen(navController,snackBarHostState)
                             }
 
                             composable(route = NavigationRoute.ProductDetails.route) { navBackStackEntry ->

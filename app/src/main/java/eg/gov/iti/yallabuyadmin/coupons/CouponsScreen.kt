@@ -419,7 +419,7 @@ fun DiscountItemCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text("Code: ${discount.code}", fontWeight = FontWeight.Bold)
-                Text("Usage: ${discount.usageCount ?: 0}")
+//                Text("Usage: ${discount.usageCount ?: 0}")
             }
 
             IconButton(onClick = { showDialog = true }) {

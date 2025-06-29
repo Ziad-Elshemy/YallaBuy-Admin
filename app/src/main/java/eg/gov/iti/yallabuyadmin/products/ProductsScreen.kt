@@ -340,7 +340,7 @@ fun ProductItem(
                 )
 
                 Text(
-                    text = "$$price",
+                    text = "EGP $price",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -349,7 +349,7 @@ fun ProductItem(
                 Text(
                     text = when {
                         quantity == 0 -> "Out of stock"
-                        quantity <= 5 -> "⚠Low stock ($quantity)"
+                        quantity <= 5 -> "Low stock ($quantity)"
                         else -> "In stock ($quantity)"
                     },
                     color = when {
