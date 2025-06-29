@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface Repository {
 
-    suspend fun getAllProducts(): Flow<ProductsResponse>
+    suspend fun getAllProducts(): Flow<ProductsResponse?>
     suspend fun deleteProduct(id: Long): Flow<Boolean>
     suspend fun getProductById(id: Long): Flow<ProductsItem?>
 
@@ -20,8 +20,8 @@ interface Repository {
     suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?>
     suspend fun deleteProductImage(productId: Long, imageId: Long): Flow<Unit?>
     suspend fun createProduct(product: ProductsItem): Flow<ProductsItem?>
-    suspend fun getAllVendors(): Flow<ProductsResponse>
-    suspend fun getAllProductTypes(): Flow<ProductsResponse>
+    suspend fun getAllVendors(): Flow<ProductsResponse?>
+    suspend fun getAllProductTypes(): Flow<ProductsResponse?>
     suspend fun setInventory(locationId: Long, inventoryItemId: Long, available: Int): Flow<Int>
 
     //price rules

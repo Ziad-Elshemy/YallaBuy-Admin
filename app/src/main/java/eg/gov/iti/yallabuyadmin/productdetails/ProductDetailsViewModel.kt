@@ -52,7 +52,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
             repo.getAllVendors()
                 .catch { _vendors.value = Response.Failure(it) }
                 .map { response ->
-                    response.products
+                    response?.products
                         ?.mapNotNull { it?.vendor }
                         ?.distinct()
                         ?: emptyList()
@@ -68,7 +68,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
             repo.getAllProductTypes()
                 .catch { _productTypes.value = Response.Failure(it) }
                 .map { response ->
-                    response.products
+                    response?.products
                         ?.mapNotNull { it?.productType }
                         ?.distinct()
                         ?: emptyList()
@@ -95,9 +95,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
 
     fun fetchProductById(id: Long) {
         viewModelScope.launch {
-            val response = repo.getProductById(id)
-            Log.e(TAG, "fetchProductById: called with id = $id")
-            response
+            repo.getProductById(id)
                 .catch { ex ->
                     _productDetails.value = Response.Failure(ex)
                 }
@@ -182,8 +180,7 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
 
     fun deleteProductImage(productId: Long, imageId: Long) {
         viewModelScope.launch {
-            val response = repo.deleteProductImage(productId, imageId)
-            response
+            repo.deleteProductImage(productId, imageId)
                 .catch { ex ->
                     _toastMessage.emit("delete image failed ${ex.message}")
                 }
@@ -202,21 +199,20 @@ class ProductDetailsViewModel(private val repo: Repository) : ViewModel() {
     fun updateCollection(productId: Long, collectionId: Long) {
 
         viewModelScope.launch {
-            val response = repo.deleteProductFromAllCollections(productId)
-            response
+            repo.deleteProductFromAllCollections(productId)
                 .catch { ex ->
                     _toastMessage.emit("delete collection failed ${ex.message}")
                 }
                 .collect {
 
-                    _toastMessage.emit("collection deleted successfully")
+//                    _toastMessage.emit("collection deleted successfully")
                     repo.assignProductToCollection(productId, collectionId)
                         .catch { ex ->
                             _toastMessage.emit("Collection Assignment Error: ${ex.message}")
                             Log.i("assignProductToCollection", "Error: ${ex.message} ")
                         }
                         .collect {
-                            _toastMessage.emit("collection updated successfully")
+//                            _toastMessage.emit("collection updated successfully")
                             Log.i(
                                 "assignProductToCollection",
                                 "added to collection successfully"

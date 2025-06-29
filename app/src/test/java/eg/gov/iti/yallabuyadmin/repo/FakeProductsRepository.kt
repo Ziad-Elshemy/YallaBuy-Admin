@@ -1,52 +1,34 @@
-package eg.gov.iti.yallabuyadmin.network
+package eg.gov.iti.yallabuyadmin.repo
 
 import eg.gov.iti.yallabuyadmin.model.AddImageRequest
-import eg.gov.iti.yallabuyadmin.model.CollectItem
 import eg.gov.iti.yallabuyadmin.model.DiscountCode
 import eg.gov.iti.yallabuyadmin.model.ImagesItem
+import eg.gov.iti.yallabuyadmin.model.InventoryItemUiModel
 import eg.gov.iti.yallabuyadmin.model.PriceRulesItem
-import eg.gov.iti.yallabuyadmin.model.PriceRulesResponse
 import eg.gov.iti.yallabuyadmin.model.ProductsItem
 import eg.gov.iti.yallabuyadmin.model.ProductsResponse
 import eg.gov.iti.yallabuyadmin.model.UpdateProductRequest
-import eg.gov.iti.yallabuyadmin.model.VariantsItem
+import eg.iti.mad.climaguard.repo.Repository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import retrofit2.Response
 
-class FakeRemoteDataSource(
-    // Mock data for test 1
-    private val fakeProductsResponse: ProductsResponse
-) : RemoteDataSource {
+class FakeProductsRepository: Repository {
 
-
-    // Mock data for test 2
-    private val priceRules = listOf(
-        PriceRulesItem(id = 1L, title = "Rule 1"),
-        PriceRulesItem(id = 2L, title = "Rule 2"),
+    var fakeProducts = listOf(
+        ProductsItem(id = 1L, title = "Product 1"),
+        ProductsItem(id = 2L, title = "Product 2")
     )
-
-    private val discountsMap = mapOf(
-        1L to listOf(
-            DiscountCode(id = 100, code = "SAVE10", priceRuleId = 1L, usageCount = 0),
-            DiscountCode(id = 101, code = "SAVE20", priceRuleId = 1L, usageCount = 3),
-        ),
-        2L to listOf(
-            DiscountCode(id = 102, code = "HELLO5", priceRuleId = 2L, usageCount = 2),
-        )
-    )
-
-    // Mock data for test 3
-    var updatedProduct: ProductsItem? = null
-
 
     override suspend fun getAllProducts(): Flow<ProductsResponse?> {
-        return flowOf(fakeProductsResponse)
+        return flowOf(ProductsResponse(products = fakeProducts.map { it }))
     }
 
     override suspend fun deleteProduct(id: Long): Flow<Boolean> {
-        TODO("Not yet implemented")
+        val isDeleted = fakeProducts.any { it.id == id }
+        if (isDeleted) {
+            fakeProducts = fakeProducts.filterNot { it.id == id }
+        }
+        return flowOf(isDeleted)
     }
 
     override suspend fun getProductById(id: Long): Flow<ProductsItem?> {
@@ -56,9 +38,8 @@ class FakeRemoteDataSource(
     override suspend fun updateProduct(
         id: Long,
         productBody: UpdateProductRequest
-    ): Flow<ProductsItem?> = flow{
-        updatedProduct = productBody.product
-        emit(updatedProduct)
+    ): Flow<ProductsItem?> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun addProductImage(id: Long, imageBody: AddImageRequest): Flow<ImagesItem?> {
@@ -101,19 +82,22 @@ class FakeRemoteDataSource(
         TODO("Not yet implemented")
     }
 
-    override suspend fun deletePriceRule(priceRuleId: Long): Boolean {
+    override suspend fun deletePriceRule(priceRuleId: Long): Flow<Boolean> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDiscountCodesByPriceRuleId(priceRuleId: Long): List<DiscountCode> {
-        return discountsMap[priceRuleId] ?: emptyList()
+    override suspend fun getAllDiscountCodes(): Flow<List<DiscountCode>> {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun getAllPriceRulesRaw(): Response<PriceRulesResponse> {
-        return Response.success(PriceRulesResponse(priceRules.map { it }))
+    override suspend fun getAllPriceRulesSync(): List<PriceRulesItem> {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun deleteDiscountCode(priceRuleId: Long, discountCodeId: Long): Boolean {
+    override suspend fun deleteDiscountCode(
+        priceRuleId: Long,
+        discountCodeId: Long
+    ): Flow<Boolean> {
         TODO("Not yet implemented")
     }
 
@@ -132,15 +116,7 @@ class FakeRemoteDataSource(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllVariants(): List<VariantsItem> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllProductsForVariants(): List<ProductsItem> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllProductsWithVariants(): List<ProductsItem> {
+    override suspend fun getInventoryItems(): Flow<List<InventoryItemUiModel>> {
         TODO("Not yet implemented")
     }
 
@@ -151,12 +127,11 @@ class FakeRemoteDataSource(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCollectsForProduct(productId: Long): List<CollectItem> {
+    override suspend fun deleteProductFromAllCollections(productId: Long): Flow<Unit> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteCollect(collectId: Long) {
+    override suspend fun getCollectsForProduct(productId: Long): Flow<Long> {
         TODO("Not yet implemented")
     }
-
 }

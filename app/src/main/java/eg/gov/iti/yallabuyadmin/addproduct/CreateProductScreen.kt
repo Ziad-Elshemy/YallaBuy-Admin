@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -96,7 +97,7 @@ fun CreateProductScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = backgroundBrush)
+                .background(Color(0xFFF8F9FA))
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top,
@@ -240,29 +241,32 @@ fun CreateProductUI(
 
 
         // Options structure
-        val optionNames = remember { mutableStateListOf<String>() }
-        var newOptionName by remember { mutableStateOf("") }
-        val optionValues = remember { mutableStateMapOf<String, MutableList<String>>() }
-
-// Add option
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = newOptionName,
-                onValueChange = { newOptionName = it },
-                label = { Text("Add Option (max 3)") },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-            Button(
-                onClick = {
-                    if (newOptionName.isNotBlank() && optionNames.size < 3 && !optionNames.contains(newOptionName)) {
-                        optionNames.add(newOptionName)
-                        optionValues[newOptionName] = mutableListOf()
-                        newOptionName = ""
-                    }
-                }
-            ) { Text("Add") }
+        val optionNames = listOf("Size", "Color")
+        val optionValues = remember {
+            mutableStateMapOf<String, MutableList<String>>().apply {
+                optionNames.forEach { put(it, mutableListOf()) }
+            }
         }
+
+//// Add option
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            OutlinedTextField(
+//                value = newOptionName,
+//                onValueChange = { newOptionName = it },
+//                label = { Text("Add Option (max 3)") },
+//                modifier = Modifier.weight(1f)
+//            )
+//            Spacer(Modifier.width(8.dp))
+//            Button(
+//                onClick = {
+//                    if (newOptionName.isNotBlank() && optionNames.size < 3 && !optionNames.contains(newOptionName)) {
+//                        optionNames.add(newOptionName)
+//                        optionValues[newOptionName] = mutableListOf()
+//                        newOptionName = ""
+//                    }
+//                }
+//            ) { Text("Add") }
+//        }
 
         Spacer(Modifier.height(12.dp))
 
@@ -284,7 +288,9 @@ fun CreateProductUI(
                         optionValues[option]?.add(newValue)
                         newValue = ""
                     }
-                }) { Text("Add") }
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
+                ) { Text("Add") }
             }
 
             // Show values added
@@ -303,14 +309,12 @@ fun CreateProductUI(
             Spacer(Modifier.height(8.dp))
         }
 
-
-        // Choose one value from each option
+// Choose one value from each option
         val selectedValues = remember { mutableStateMapOf<String, String>() }
         var variantPrice by remember { mutableStateOf("") }
         var variantQuantity by remember { mutableStateOf("") }
 //        var variantSku by remember { mutableStateOf("") }
         val variantsList = remember { mutableStateListOf<VariantsItem>() }
-
 
         Text("Add Variant", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
@@ -347,23 +351,21 @@ fun CreateProductUI(
 //                    variantSku = ""
                     selectedValues.clear()
                 }
-            }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
         ) {
             Text("Add Variant")
         }
 
-
-
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = {
-
             val product = ProductsItem(
                 title = title,
                 bodyHtml = description,
                 vendor = selectedVendor,
                 productType = selectedType,
-//                tags = tags,
+//        tags = tags,
                 status = status,
                 image = imageList.firstOrNull()?.let { Image(src = it.url) },
                 images = imageList.map { ImagesItem(src = it.url) },
@@ -373,8 +375,10 @@ fun CreateProductUI(
                 variants = variantsList
             )
 
-            onSubmit(product,selectedCollection ?: fixedCollections.get(0))
-        }) {
+            onSubmit(product, selectedCollection ?: fixedCollections.get(0))
+        },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
+        ) {
             Text("Create Product")
         }
     }

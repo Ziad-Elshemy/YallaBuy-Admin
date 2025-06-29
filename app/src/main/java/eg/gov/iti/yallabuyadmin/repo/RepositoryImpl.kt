@@ -22,7 +22,7 @@ class RepositoryImpl(
     private val TAG = "RepositoryImpl"
 
 
-    override suspend fun getAllProducts(): Flow<ProductsResponse> {
+    override suspend fun getAllProducts(): Flow<ProductsResponse?> {
         return remoteDataSource.getAllProducts()
     }
 
@@ -53,11 +53,11 @@ class RepositoryImpl(
         return remoteDataSource.createProduct(product)
     }
 
-    override suspend fun getAllVendors(): Flow<ProductsResponse> {
+    override suspend fun getAllVendors(): Flow<ProductsResponse?> {
         return remoteDataSource.getAllVendors()
     }
 
-    override suspend fun getAllProductTypes(): Flow<ProductsResponse> {
+    override suspend fun getAllProductTypes(): Flow<ProductsResponse?> {
         return remoteDataSource.getAllProductTypes()
     }
 

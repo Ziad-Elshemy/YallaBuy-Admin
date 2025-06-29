@@ -45,9 +45,9 @@ class RepositoryImplTest{
         val result = repository.getAllProducts().first()
 
         // Then
-        assertThat(result.products?.size, `is`(1))
-        assertThat(result.products?.get(0)?.title, `is`("Test Product"))
-        assertThat(result.products?.get(0)?.vendor, `is`("YallaBuy"))
+        assertThat(result?.products?.size, `is`(1))
+        assertThat(result?.products?.get(0)?.title, `is`("Test Product"))
+        assertThat(result?.products?.get(0)?.vendor, `is`("YallaBuy"))
     }
 
     @Test

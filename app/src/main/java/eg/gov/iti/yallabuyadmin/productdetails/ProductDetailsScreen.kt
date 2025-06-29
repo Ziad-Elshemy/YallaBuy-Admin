@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -346,18 +347,18 @@ fun ProductDetailsScreenUI(
             }
         }
 
-        if (existingOptions.size < 3) {
-            var newOptionName by remember { mutableStateOf("") }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(newOptionName, { newOptionName = it }, label = { Text("Add Option") }, modifier = Modifier.weight(1f))
-                IconButton(onClick = {
-                    if (newOptionName.isNotBlank()) {
-                        existingOptions.add(OptionsItem(name = newOptionName, values = emptyList()))
-                        newOptionName = ""
-                    }
-                }) { Icon(Icons.Default.Add, contentDescription = "Add Option") }
-            }
-        }
+//        if (existingOptions.size < 3) {
+//            var newOptionName by remember { mutableStateOf("") }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                OutlinedTextField(newOptionName, { newOptionName = it }, label = { Text("Add Option") }, modifier = Modifier.weight(1f))
+//                IconButton(onClick = {
+//                    if (newOptionName.isNotBlank()) {
+//                        existingOptions.add(OptionsItem(name = newOptionName, values = emptyList()))
+//                        newOptionName = ""
+//                    }
+//                }) { Icon(Icons.Default.Add, contentDescription = "Add Option") }
+//            }
+//        }
 
         Divider()
         Text("Define Variants", style = MaterialTheme.typography.titleMedium)
@@ -404,7 +405,8 @@ fun ProductDetailsScreenUI(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
         ) {
             Text("Update Product")
         }
@@ -460,7 +462,7 @@ fun ProductImageItem(
                                 .fillMaxSize()
                                 .clip(RoundedCornerShape(10.dp)),
                             loading = {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF009688))
                             },
                             failure = {
                                 Icon(Icons.Default.Build, contentDescription = "Failed to load")

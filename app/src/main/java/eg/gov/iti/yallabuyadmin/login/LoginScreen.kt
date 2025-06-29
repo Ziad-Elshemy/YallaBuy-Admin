@@ -39,6 +39,7 @@ import androidx.compose.material3.CircularProgressIndicator
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,11 +50,15 @@ import androidx.navigation.NavController
 import eg.gov.iti.yallabuyadmin.R
 import eg.gov.iti.yallabuyadmin.navigation.NavigationRoute
 import eg.gov.iti.yallabuyadmin.utils.PrefsHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController,
+                snackbarHostState: SnackbarHostState) {
     var shouldNavigate by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(Unit) {
@@ -67,7 +72,7 @@ fun LoginScreen(navController: NavController) {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = Color(0xFF009688))
             }
         }
 
@@ -90,6 +95,9 @@ fun LoginScreen(navController: NavController) {
                     }
                 } else {
                     Log.d("Login", "Invalid credentials")
+                    CoroutineScope(Dispatchers.Main).launch {
+                        snackbarHostState.showSnackbar("Invalid username or password")
+                    }
                 }
             }
         }

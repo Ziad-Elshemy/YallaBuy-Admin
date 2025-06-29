@@ -31,7 +31,7 @@ import retrofit2.http.Query
 
 interface ShopifyApi {
     @GET("products.json")
-    suspend fun getProducts(): ProductsResponse
+    suspend fun getProducts(): Response<ProductsResponse>
 
 
     // delete products
@@ -42,7 +42,7 @@ interface ShopifyApi {
     @GET("products/{id}.json")
     suspend fun getProductById(
         @Path("id") productId: Long
-    ): ProductByIdResponse
+    ): Response<ProductByIdResponse>
 
 
     // update product
@@ -75,10 +75,10 @@ interface ShopifyApi {
     ): Response<ProductWrapper>
 
     @GET("products.json?fields=vendor")
-    suspend fun getVendors(): ProductsResponse
+    suspend fun getVendors(): Response<ProductsResponse>
 
     @GET("products.json?fields=product_type")
-    suspend fun getProductTypes(): ProductsResponse
+    suspend fun getProductTypes(): Response<ProductsResponse>
 
     @POST("inventory_levels/set.json")
     suspend fun setInventory(
